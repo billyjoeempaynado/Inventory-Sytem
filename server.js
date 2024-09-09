@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");  // Import path module
-const { Pool } = require('pg');
+const { Pool } = require("./dbConfig");
+
 
 const inventoryRoutes = require("./src/product/routes")
 

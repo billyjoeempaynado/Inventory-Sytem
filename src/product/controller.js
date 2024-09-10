@@ -70,10 +70,19 @@ const updateItem = (req, res) => {
   });
 };
 
+
+const getUsers = (req, res) => {
+  pool.query(queries.getUsers, (error, results) => {
+    if (error) throw error;
+      res.status(200).json(results.rows);  
+  })
+};
+
 module.exports = {
   getProducts,
   getProductById,
   addItem,
   deleteItem,
-  updateItem
+  updateItem,
+  getUsers
 };

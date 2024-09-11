@@ -2,6 +2,8 @@ const express = require("express");
 const path = require("path");  // Import path module
 const { pool } = require("./dbConfig");
 const brcypt = require ("bcrypt");
+const session = require("express-session");
+const flash = require("express-flash");
 
 
 const inventoryRoutes = require("./src/product/routes")
@@ -12,10 +14,20 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 app.set("view engine", "ejs");
-
 app.use(express.static(path.join(__dirname, "src")));
 
 app.use(express.urlencoded({extended: false}));
+
+app.use(session({
+    secret: 'secret',
+
+    resave: false,
+
+    saveUninitialized: false
+})
+);
+
+app.use(flash());
 
 app.get("/", (req, res) => {
     res.render("index");
@@ -67,12 +79,32 @@ app.post("/users/register", async (req, res) => {
         console.log(hashedPassword);
 
         pool.query(
-            `SELCET * FROM users
-            WHERE email = $1`, [email], (err, result) => {
+            `SELECT * FROM users
+            WHERE email = $1`, [email], (err, results) => {
                 if(err) {
                     throw err;
                 }
-                    console.log(result.rows);
+                    
+                    console.log(results.rows);
+
+                    if(results.rows.length > 0) {
+                        errors.push({ message: "Email already registered"});
+                        res.render("register", {errors});
+                    }else{
+                        pool.query(
+                            `INSERT INTO users(name, email, password)
+                            VALUES ($1, $2, $3)
+                            RETURNING id, password`, [name, email, hashedPassword],
+                            (err, results) => {
+                                if (err){
+                                    throw err;
+                                }
+                                console.log(results.rows);
+                                req.flash("success_msg", "You are now registered. Please log in");
+                                res.redirect("/users/login");
+                            }
+                        );
+                    }
             }
         );
     }

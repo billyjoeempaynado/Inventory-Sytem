@@ -1,4 +1,4 @@
-const localStrategy = require("passport-local").Strategy;
+const LocalStrategy = require("passport-local").Strategy;
 const { authenticate } = require("passport");
 const {pool} = require("./dbConfig");
 const bcrypt = require("bcrypt");
@@ -17,7 +17,7 @@ const authenticateUser = (email, password, done) => {
 
       console.log(results.rows);
 
-      if(results.rows.lenght > 0 ) {
+      if(results.rows.length > 0 ) {
         const user = results.rows[0];
 
         bcrypt.compare(password, user.password, (err, isMatch) => {
@@ -38,7 +38,7 @@ const authenticateUser = (email, password, done) => {
   );
 };
   passport.use(
-    new localStrategy(
+    new LocalStrategy(
     {
     usernameField: "email",
     passwordField: "password"

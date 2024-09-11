@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");  // Import path module
 const { pool } = require("./dbConfig");
-const brcypt = require ("bcrypt");
+const bcrypt = require ("bcrypt");
 const session = require("express-session");
 const flash = require("express-flash");
 const passport = require("passport");
@@ -25,10 +25,8 @@ app.use(express.static(path.join(__dirname, "src")));
 app.use(express.urlencoded({extended: false}));
 
 app.use(session({
-    secret: 'secret',
-
+    secret: "secret",
     resave: false,
-
     saveUninitialized: false
 })
 );
@@ -84,7 +82,7 @@ app.post("/users/register", async (req, res) => {
     }else{
         // Form validation has passed
 
-        let hashedPassword = await brcypt.hash(password, 10);
+        let hashedPassword = await bcrypt.hash(password, 10);
         console.log(hashedPassword);
 
         pool.query(

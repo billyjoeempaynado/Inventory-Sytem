@@ -4,6 +4,12 @@ const { pool } = require("./dbConfig");
 const brcypt = require ("bcrypt");
 const session = require("express-session");
 const flash = require("express-flash");
+const passport = require("passport");
+
+
+const initializePassport = require("./passportConfig");
+
+initializePassport(passport);
 
 
 const inventoryRoutes = require("./src/product/routes")
@@ -26,6 +32,9 @@ app.use(session({
     saveUninitialized: false
 })
 );
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(flash());
 
@@ -110,10 +119,19 @@ app.post("/users/register", async (req, res) => {
     }
 });
 
+app.post("/users/login", passport.authenticate("local", {
+    successRedirect: "/users/dashboard",
+    failureRedirect: "/users/login",
+    failureFlash: true
+    })
+);
+
 
 app.use("/api/v1/Inventory_System", inventoryRoutes);
 app.use("/api/v1/Users", userRouter);
 
 app.listen(port, () => console.log(`app listening on port ${port}`));
+
+
 
 

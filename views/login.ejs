@@ -19,7 +19,15 @@
             <% if(messages.success_msg) { %>
                 <li><%= messages.success_msg %></li>
                 <% } %>
-            </ul>
+        </ul>
+
+        <ul>
+            <% if(messages.error) { %>
+                <li> <%= messages.error %> </li>
+
+           <% } %>
+        </ul>
+        
         <form action="">
             <div class="mb-4">
                 <label class="block text-gray-600 mb-2" for="email">Enter email</label>

@@ -49,7 +49,7 @@ app.get("/users/login", checkAuthenticated, (req, res) => {
 });
 
 app.get("/users/dashboard", checkNotAuthenticated, (req, res) => {
-    res.render("dashboard", {user: req.user.name});
+    res.render("dashboard");
 });
 
 app.get("/users/logout", (req, res, next) => {

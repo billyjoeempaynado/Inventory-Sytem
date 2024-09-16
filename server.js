@@ -5,6 +5,9 @@ const bcrypt = require ("bcrypt");
 const session = require("express-session");
 const flash = require("express-flash");
 const passport = require("passport");
+const productRoutes = require('./src/product/routes'); // Importing routes
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 
 const initializePassport = require("./passportConfig");
@@ -30,6 +33,9 @@ app.use(session({
     saveUninitialized: false
 })
 );
+
+// Route handling
+app.use('/api', productRoutes);  // Mount the product routes with the /api prefix
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -134,6 +140,17 @@ app.post("/users/login", passport.authenticate("local", {
     })
 );
 
+// POST route for /items
+app.post('/items', (req, res) => {
+    const { item_name, stock_number } = req.body;
+
+    // Process the data (e.g., save it to a database)
+    console.log(`Item Name: ${item_name}, Stock Number: ${stock_number}`);
+
+    // Send a success response
+    res.status(201).json({ message: 'Item added successfully' });
+});
+
 
 function checkAuthenticated(req, res, next){
     if (req.isAuthenticated()){
@@ -149,6 +166,10 @@ function checkNotAuthenticated(req, res, next){
 
     res.redirect("/users/login");
 }
+
+// Middleware
+app.use(bodyParser.json()); // Parse incoming JSON
+app.use(cors());
 
 app.use("/api/v1/Inventory_System", inventoryRoutes);
 app.use("/api/v1/Users", userRouter);

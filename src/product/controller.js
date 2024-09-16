@@ -19,10 +19,17 @@ const getProductById = (req, res) => {
 const addItem = (req, res) => {
   const { item_name, stock_number } = req.body;
 
+  console.log("Request Body:", req.body);  // Log the entire request body
+
+  if (!item_name || !stock_number) {
+    return res.status(400).json({ error: "Item name and stock number are required" });
+  }
+
   pool.query(queries.addItem, [item_name, stock_number], (error, results) => {
     if (error) throw error;
-    res.status(201).send("Product Created Successfully!"); 
+    res.status(201).send("Item Created Successfully!");
   });
+};
 
   // for email check if email exist
   // pool.query(queries.checkEmailExist, [email], (error, results) => {
@@ -35,7 +42,6 @@ const addItem = (req, res) => {
               // res.status(201).send("Student Created Successfully!");  
           //});
   // });
-};
 
 const deleteItem = (req, res) => {
     const id = parseInt(req.params.id);
@@ -71,18 +77,12 @@ const updateItem = (req, res) => {
 };
 
 
-const getUsers = (req, res) => {
-  pool.query(queries.getUsers, (error, results) => {
-    if (error) throw error;
-      res.status(200).json(results.rows);  
-  })
-};
+
 
 module.exports = {
   getProducts,
   getProductById,
   addItem,
   deleteItem,
-  updateItem,
-  getUsers
+  updateItem
 };

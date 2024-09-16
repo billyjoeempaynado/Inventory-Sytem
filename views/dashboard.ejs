@@ -33,14 +33,12 @@
                 </a>
             </nav>
         </div>
-        <div class="p-4">
-            <a href="/users/logout" class="flex items-center py-2 px-4 hover:bg-gray-700">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1m0-10V5m0 0a2 2 0 112 2V7a2 2 0 11-2-2z" />
-                </svg>
-                <span>Logout</span>
-            </a>
-        </div>
+        <div class="sm:flex p-4">
+          <a href="/users/logout" class="flex items-center py-2 px-4 hover:bg-gray-700">
+              <i class="fa-solid fa-right-from-bracket mr-2"></i> <!-- Added margin-right -->
+              <span>Logout</span>
+          </a>
+      </div>
     </aside>
 
     <!-- Main content -->
@@ -51,11 +49,7 @@
     </div>
   </div>
 
-  <!-- Button to open the modal -->
-<button id="addItemButton" class="bg-blue-500 text-white px-4 py-2 rounded">Add Item</button>
 
-<!-- Button to open the modal -->
-<button id="addItemButton" class="bg-blue-500 text-white px-4 py-2 rounded">Add Item</button>
 
 <!-- Modal Structure -->
 <div id="modal" class="fixed z-10 inset-0 overflow-y-auto hidden">
@@ -77,10 +71,8 @@
                   <input type="text" id="itemName" name="itemName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                 </div>
                 <div class="mb-4" id="statusDiv">
-                  <label for="status" class="block text-gray-700 text-sm font-bold mb-2">Status</label>
+                  <label for="status" class="block text-gray-700 text-sm font-bold mb-2">Stock</label>
                   <select id="status" name="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
                   </select>
                 </div>
               </form>
@@ -97,7 +89,7 @@
 </div>
 </div>
   
-  <script src="/product/app.js"></script>
+  <script type="module" src="/product/app.js"></script>
 
 </body>
 </html>

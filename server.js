@@ -171,8 +171,8 @@ function checkNotAuthenticated(req, res, next){
 app.use(bodyParser.json()); // Parse incoming JSON
 app.use(cors());
 
-app.use("/api/v1/Inventory_System", inventoryRoutes);
-app.use("/api/v1/Users", userRouter);
+app.use("/api/v1/inventory", inventoryRoutes);
+app.use("/api/v1/users", userRouter);
 
 app.listen(port, () => console.log(`app listening on port ${port}`));
 

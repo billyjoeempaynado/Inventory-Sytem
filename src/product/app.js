@@ -1,25 +1,21 @@
-// app.js
 import UI from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const ui = new UI();
 
-    document.addEventListener('click', (event) => {
-        if (event.target && event.target.matches('#addItemButton')) {
-            ui.openModal('items');
-        }
-
-        if (event.target && event.target.matches('#addProductButton')) {
-            ui.openModal('product');
-        }
+    // Load previously saved items from localStorage
+    const savedItems = JSON.parse(localStorage.getItem('items')) || [];
+    savedItems.forEach(item => {
+        ui.addNewRowToTable(item, 'items');
     });
 
+    // Add event listener for form submission
     document.getElementById('modalForm').addEventListener('submit', async (event) => {
         event.preventDefault();
+
         const type = ui.modalTitle.textContent.toLowerCase().includes('item') ? 'items' : 'product';
 
         let data = {};
-
         if (type === 'items') {
             const item_name = document.getElementById('itemName').value;
             const stock_number = document.getElementById('stockNumber').value;
@@ -31,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch(`http://localhost:8080/api/v1/Inventory_System/items`, {
+            const response = await fetch(`http://localhost:8080/api/v1/inventory/${type}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,7 +37,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 alert(`${type === 'items' ? 'Item' : 'Product'} added successfully`);
-                ui.closeModal(); // Hide modal after success
+                ui.addNewRowToTable(data, type);
+                ui.closeModal();
+
+                // Save item to localStorage
+                const storedItems = JSON.parse(localStorage.getItem('items')) || [];
+                storedItems.push(data);
+                localStorage.setItem('items', JSON.stringify(storedItems));
             } else {
                 alert(`Error adding ${type}`);
             }

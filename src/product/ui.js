@@ -8,6 +8,10 @@ export default class UI {
         this.statusDiv = document.getElementById('statusDiv');
         this.cancelButton = document.getElementById('cancelButton');
 
+        // Pagination control
+        this.currentPage = 1; // Default to the first page
+        this.itemsPerPage = 5; // Set items per page
+
         // Attach click event to all links with data-link attribute
         this.links.forEach(link => {
             link.addEventListener('click', (event) => {
@@ -26,7 +30,7 @@ export default class UI {
             case 'items':
                 content = this.getItemContent();
                 break;
-            case 'product':
+            case 'products':
                 content = this.getProductContent();
                 break;
             default:
@@ -38,22 +42,84 @@ export default class UI {
         this.contentDiv.innerHTML = content;
 
         // Attach modal open event
-        if (target === 'items') {
-            document.getElementById('addItemButton')?.addEventListener('click', () => this.openModal('items'));
-            // Load saved items from localStorage and populate the table
-            const savedItems = JSON.parse(localStorage.getItem('items')) || [];
-            savedItems.forEach(item => {
-            this.addNewRowToTable(item, 'items'); 
+    if (target === 'items') {
+        document.getElementById('addItemButton')?.addEventListener('click', () => this.openModal('items'));
+
+        // Load saved items from localStorage and populate the table with pagination
+        const savedItems = JSON.parse(localStorage.getItem('items')) || [];
+        this.renderTableWithPagination(savedItems, 'items');  // Render table with pagination
+    } else if (target === 'products') {
+        document.getElementById('addProductButton')?.addEventListener('click', () => this.openModal('products'));
+
+        // Load saved products from localStorage and populate the table with pagination
+        const savedProducts = JSON.parse(localStorage.getItem('products')) || [];
+        this.renderTableWithPagination(savedProducts, 'products');  // Render table with pagination
+    }
+    }
+
+         renderTableWithPagination(data, type) {
+        const totalPages = Math.ceil(data.length / this.itemsPerPage);  // Calculate total pages
+        
+        // Slice data to display only the current page's items
+        const paginatedData = data.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+        
+        // Clear the table body
+        const tableBody = document.getElementById(`${type}TableBody`);
+        tableBody.innerHTML = '';  // Clear current rows
+    
+        // Populate table with the paginated data
+        paginatedData.forEach(item => {
+            this.addNewRowToTable(item, type);
         });
-        } else if (target === 'product') {
-            document.getElementById('addProductButton')?.addEventListener('click', () => this.openModal('product'));
-             // Load saved products from localStorage and populate the table
-            const savedProducts = JSON.parse(localStorage.getItem('products')) || [];
-            savedProducts.forEach(product => {
-            this.addNewRowToTable(product, 'product');
-        });
+    
+        // Render pagination buttons
+        this.renderPaginationControls(totalPages, type);  // Render the pagination buttons for navigating pages
+    }
+    
+
+         renderPaginationControls(totalPages, type) {
+        const paginationDiv = document.getElementById('pagination');
+        paginationDiv.innerHTML = ''; // Clear the current pagination buttons
+    
+        // Add "Previous" button if the current page is greater than 1
+        if (this.currentPage > 1) {
+            const prevButton = document.createElement('button');
+            prevButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded';
+            prevButton.textContent = 'Previous';
+            prevButton.addEventListener('click', () => {
+                this.currentPage--;  // Move to the previous page
+                this.renderTableWithPagination(JSON.parse(localStorage.getItem(type)), type);  // Re-render the table
+            });
+            paginationDiv.appendChild(prevButton);
+        }
+    
+        // Add numbered page buttons
+        for (let i = 1; i <= totalPages; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded';
+            pageButton.textContent = i;
+            pageButton.disabled = (i === this.currentPage);  // Disable the current page button
+            pageButton.addEventListener('click', () => {
+                this.currentPage = i;  // Set current page to the clicked page number
+                this.renderTableWithPagination(JSON.parse(localStorage.getItem(type)), type);  // Re-render the table
+            });
+            paginationDiv.appendChild(pageButton);
+        }
+    
+        // Add "Next" button if the current page is less than the total pages
+        if (this.currentPage < totalPages) {
+            const nextButton = document.createElement('button');
+            nextButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded';
+            nextButton.textContent = 'Next';
+            nextButton.addEventListener('click', () => {
+                this.currentPage++;  // Move to the next page
+                this.renderTableWithPagination(JSON.parse(localStorage.getItem(type)), type);  // Re-render the table
+            });
+            paginationDiv.appendChild(nextButton);
         }
     }
+    
+    
 
     getItemContent() {
         return `
@@ -77,8 +143,8 @@ export default class UI {
 
     getProductContent() {
         return `
-                <h2 class="text-xl font-semibold mb-4">Manage Items</h2>
-                <button id="addItemButton" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Add Items</button>
+                <h2 class="text-xl font-semibold mb-4">Manage Products</h2>
+                <button id="addProductButton" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Add Products</button>
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <table class="min-w-full bg-white">
                         <thead>
@@ -134,7 +200,7 @@ export default class UI {
                     <button id="cancelModal" type="button" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-red-500 text-base font-medium text-white hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:mt-0 sm:w-auto sm:text-sm">Cancel</button>
                 </div>
             `;
-        } else if (type === 'product') {
+        } else if (type === 'products') {
             this.modalTitle.textContent = 'Add Product';
             this.modalForm.innerHTML = `
                 <div class="mb-4">

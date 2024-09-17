@@ -5,19 +5,15 @@ const bcrypt = require ("bcrypt");
 const session = require("express-session");
 const flash = require("express-flash");
 const passport = require("passport");
-const productRoutes = require('./src/product/routes'); // Importing routes
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const bodyParser = require("body-parser");
+const cors = require("cors");
+const itemRoutes = require("./src/product/routes"); // Importing item route
+const userRoutes = require("./src/product/userRoutes");
+const productRoutes = require("./src/product/productRoutes");
 
 
 const initializePassport = require("./passportConfig");
-
 initializePassport(passport);
-
-
-const inventoryRoutes = require("./src/product/routes")
-const userRouter = require("./src/product/userRoutes")
-
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -34,13 +30,20 @@ app.use(session({
 })
 );
 
-// Route handling
-app.use('/api', productRoutes);  // Mount the product routes with the /api prefix
+// Routes
+app.use("/api/v1/inventory", itemRoutes);
+app.use("/api/v1/inventory", productRoutes);
+app.use("/api/v1/users", userRoutes);
+
+
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 app.use(flash());
+
+// Middleware
+app.use(bodyParser.json()); // Parse incoming JSON
+app.use(cors());
 
 app.get("/", (req, res) => {
     res.render("index");
@@ -141,7 +144,7 @@ app.post("/users/login", passport.authenticate("local", {
 );
 
 // POST route for /items
-app.post('/items', (req, res) => {
+app.post("/items", (req, res) => {
     const { item_name, stock_number } = req.body;
 
     // Process the data (e.g., save it to a database)
@@ -149,6 +152,17 @@ app.post('/items', (req, res) => {
 
     // Send a success response
     res.status(201).json({ message: 'Item added successfully' });
+});
+
+// POST route for /items
+app.post("/poducts", (req, res) => {
+    const { product_name, price } = req.body;
+
+    // Process the data (e.g., save it to a database)
+    console.log(`Product Name: ${product_name}, Price: ${price}`);
+
+    // Send a success response
+    res.status(201).json({ message: 'Product added successfully' });
 });
 
 
@@ -167,15 +181,5 @@ function checkNotAuthenticated(req, res, next){
     res.redirect("/users/login");
 }
 
-// Middleware
-app.use(bodyParser.json()); // Parse incoming JSON
-app.use(cors());
-
-app.use("/api/v1/inventory", inventoryRoutes);
-app.use("/api/v1/users", userRouter);
 
 app.listen(port, () => console.log(`app listening on port ${port}`));
-
-
-
-

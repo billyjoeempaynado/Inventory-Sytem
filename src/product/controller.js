@@ -1,16 +1,16 @@
 const pool = require("../../db");
 const queries = require("./queries");
 
-const getProducts = (req, res) => {
-  pool.query(queries.getProducts, (error, results) => {
+const getItems = (req, res) => {
+  pool.query(queries.getItems, (error, results) => {
     if (error) throw error;
       res.status(200).json(results.rows);  
   })
 };
 
-const getProductById = (req, res) => {
+const getItemById = (req, res) => {
   const id = parseInt(req.params.id);
-  pool.query(queries.getProductById, [id], (error, results) => {
+  pool.query(queries.getItemById, [id], (error, results) => {
     if (error) throw error;
     res.status(200).json(results.rows);
   });
@@ -46,7 +46,7 @@ const addItem = (req, res) => {
 const deleteItem = (req, res) => {
     const id = parseInt(req.params.id);
 
-    pool.query(queries.getProductById, [id], (error, results) =>{
+    pool.query(queries.getItemById, [id], (error, results) =>{
           const noItemFound = !results.rows.length;
           if (noItemFound) {
           res.send("Item does not exist in the database");
@@ -63,7 +63,7 @@ const updateItem = (req, res) => {
   const id = parseInt(req.params.id);
   const {item_name} = req.body;
 
-  pool.query(queries.getProductById, [id], (error, results) => {
+  pool.query(queries.getItemById, [id], (error, results) => {
     const noItemFound = !results.rows.length;
     if (noItemFound) {
     res.send("Item does not exist in the database");
@@ -80,8 +80,8 @@ const updateItem = (req, res) => {
 
 
 module.exports = {
-  getProducts,
-  getProductById,
+  getItems,
+  getItemById,
   addItem,
   deleteItem,
   updateItem

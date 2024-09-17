@@ -11,8 +11,7 @@ module.exports = {
   getUserById,
   addUser,
   deleteUser,
-  updateUser,
-  getUsers
+  updateUser
   // checkEmailExist,
   // addStudent
 };

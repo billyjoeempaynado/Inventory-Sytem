@@ -10,7 +10,7 @@ export default class UI {
 
         // Pagination control
         this.currentPage = 1; // Default to the first page
-        this.itemsPerPage = 5; // Set items per page
+        this.itemsPerPage = 10; // Set items per page
 
         // Attach click event to all links with data-link attribute
         this.links.forEach(link => {
@@ -124,7 +124,7 @@ export default class UI {
     getItemContent() {
         return `
                 <h2 class="text-xl font-semibold mb-4">Manage Items</h2>
-                <button id="addItemButton" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Add Items</button>
+                <button id="addItemButton" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Add Item</button>
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <table class="min-w-full bg-white">
                         <thead>
@@ -144,17 +144,17 @@ export default class UI {
     getProductContent() {
         return `
                 <h2 class="text-xl font-semibold mb-4">Manage Products</h2>
-                <button id="addProductButton" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Add Products</button>
+                <button id="addProductButton" class="bg-blue-500 text-white px-4 py-2 rounded mb-4 hover:bg-blue-700">Add Product</button>
                 <div class="bg-white shadow-md rounded-lg overflow-hidden">
                     <table class="min-w-full bg-white">
                         <thead>
                             <tr>
-                                <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                                <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Number</th>
+                                <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
+                                <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
                                 <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="itemsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        <tbody id="productsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
                 <div id="pagination" class="mt-4 flex justify-center space-x-2"></div>
@@ -167,17 +167,19 @@ export default class UI {
             const newRow = document.createElement('tr');
             newRow.innerHTML = `
                 <td class="py-4 px-6 text-sm font-medium text-gray-900">${data.item_name || data.product_name}</td>
-                <td class="py-4 px-6 text-sm text-gray-500">${type === 'items' ? data.stock_number : `$${data.price}`}</td>
+                <td class="py-4 px-6 text-sm text-gray-500">${type === 'items' ? data.stock_number : `\u20B1${data.price}`}</td>
                 <td class="sm:flex py-4 px-6 text-sm">
-                    <button class="p-2 text-gray-700 hover:text-gray-500">
+                    <button id="edit" class="p-2 text-gray-700 hover:text-gray-500">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
-                    <button class="p-2 text-red-700 hover:text-red-500">
+                    <button id="delete" class="p-2 text-red-700 hover:text-red-500">
                         <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
                     </button>
                 </td>
             `;
             tableBody.appendChild(newRow);
+        } else {
+            console.error(`Table body element not found for type: ${type}`);
         }
     }
 

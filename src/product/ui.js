@@ -7,6 +7,8 @@ export default class UI {
         this.modalForm = document.getElementById('modalForm');
         this.statusDiv = document.getElementById('statusDiv');
         this.cancelButton = document.getElementById('cancelButton');
+        this.deleteBtn = document.querySelector('#deleteBtn');
+      
 
         // Pagination control
         this.currentPage = 1; // Default to the first page
@@ -77,14 +79,15 @@ export default class UI {
     }
     
 
-         renderPaginationControls(totalPages, type) {
+    renderPaginationControls(totalPages, type) {
         const paginationDiv = document.getElementById('pagination');
+      
         paginationDiv.innerHTML = ''; // Clear the current pagination buttons
     
         // Add "Previous" button if the current page is greater than 1
         if (this.currentPage > 1) {
             const prevButton = document.createElement('button');
-            prevButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded';
+            prevButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md transition-colors duration-300';
             prevButton.textContent = 'Previous';
             prevButton.addEventListener('click', () => {
                 this.currentPage--;  // Move to the previous page
@@ -96,7 +99,7 @@ export default class UI {
         // Add numbered page buttons
         for (let i = 1; i <= totalPages; i++) {
             const pageButton = document.createElement('button');
-            pageButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded';
+            pageButton.className = `pagination-button px-4 py-2 rounded-md transition-colors duration-300 ${i === this.currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-700 hover:bg-blue-400 hover:text-white'}`;
             pageButton.textContent = i;
             pageButton.disabled = (i === this.currentPage);  // Disable the current page button
             pageButton.addEventListener('click', () => {
@@ -109,7 +112,7 @@ export default class UI {
         // Add "Next" button if the current page is less than the total pages
         if (this.currentPage < totalPages) {
             const nextButton = document.createElement('button');
-            nextButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded';
+            nextButton.className = 'pagination-button bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-md transition-colors duration-300';
             nextButton.textContent = 'Next';
             nextButton.addEventListener('click', () => {
                 this.currentPage++;  // Move to the next page
@@ -118,6 +121,7 @@ export default class UI {
             paginationDiv.appendChild(nextButton);
         }
     }
+    
     
     
 
@@ -163,25 +167,46 @@ export default class UI {
 
     addNewRowToTable(data, type) {
         const tableBody = document.getElementById(`${type}TableBody`);
+
+        //   // Debug: Check if the data object contains the id
+        //  console.log('Data object:', data);  // This will show if data.id exists 
+
         if (tableBody) {
+            // Create a new row
             const newRow = document.createElement('tr');
+                   
             newRow.innerHTML = `
+          
                 <td class="py-4 px-6 text-sm font-medium text-gray-900">${data.item_name || data.product_name}</td>
                 <td class="py-4 px-6 text-sm text-gray-500">${type === 'items' ? data.stock_number : `\u20B1${data.price}`}</td>
                 <td class="sm:flex py-4 px-6 text-sm">
                     <button id="edit" class="p-2 text-gray-700 hover:text-gray-500">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
-                    <button id="delete" class="p-2 text-red-700 hover:text-red-500">
+                    <button data-id="${type.id}" class="deleteBtn p-2 text-red-700 hover:text-red-500">
                         <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
                     </button>
                 </td>
+           
             `;
+
+            
+            const deleteBtn = newRow.querySelector('.deleteBtn');
+            deleteBtn.addEventListener('click', (event) => {
+            const itemId = event.target.closest('button').getAttribute('data-id'); // Get the data-id of the clicked row
+            console.log(`Deleting item with ID: ${itemId}`);
+
+            
+              });
+
             tableBody.appendChild(newRow);
-        } else {
-            console.error(`Table body element not found for type: ${type}`);
+
+            } else {
+                console.error(`Table body element not found for type: ${type}`);
+            }
+
         }
-    }
+                    
 
     openModal(type) {
         this.modalForm.reset();

@@ -15,8 +15,11 @@ const productRoutes = require("./src/product/productRoutes");
 const initializePassport = require("./passportConfig");
 initializePassport(passport);
 
+
 const app = express();
 const port = process.env.PORT || 8080;
+
+
 
 app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "src")));
@@ -38,12 +41,23 @@ app.use(passport.session());
 app.use(flash());
 
 // Routes
-app.use("/api/v1/inventory/items", itemRoutes); 
-app.use("/api/v1/inventory/products", productRoutes);
+app.use("/api/inventory/items", itemRoutes); 
+app.use("/api/inventory/products", productRoutes);
 app.use("/api/v1/users", userRoutes);
 
+
 app.get("/", (req, res) => {
-    res.render("index");
+    res.render("login");
+});
+
+// Route to render items page
+app.get('/', (req, res) => {
+    res.render('items'); // Renders items.ejs
+});
+
+// Route to render items page
+app.get('/', (req, res) => {
+    res.render('products'); // Renders items.ejs
 });
 
 app.get("/users/register", checkAuthenticated, (req, res) => {
@@ -108,11 +122,15 @@ app.post("/users/register", async (req, res) => {
     }
 });
 
+
+
 app.post("/users/login", passport.authenticate("local", {
     successRedirect: "/users/dashboard",
     failureRedirect: "/users/login",
     failureFlash: true
 }));
+
+
 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
@@ -128,4 +146,6 @@ function checkNotAuthenticated(req, res, next) {
     res.redirect("/users/login");
 }
 
-app.listen(port, () => console.log(`App listening on port ${port}`));
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});

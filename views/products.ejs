@@ -1,21 +1,41 @@
 <div id="productsSection" class="hidden">
-  <h1 class="text-3xl mb-4 font-bold">Products</h1>
+    <h1 class="text-3xl mb-4 font-bold">Items</h1>
+  
+    <!-- Add Item Button -->
+    <button id="addProductButton" class="mb-4 bg-blue-500 text-white px-4 py-2 rounded">Add Product</button>
 
-  <!-- Product management UI goes here -->
-  <button class="bg-green-500 mb-4 text-white px-4 py-2 rounded">Add Product</button>
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full bg-white">
+            <thead>
+                <tr>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody id="productsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+    <div id="pagination" class="mt-4 flex justify-center space-x-2"></div>
 
-  <div class="bg-white shadow-md rounded-lg overflow-hidden">
-    <table class="min-w-full bg-white">
-        <thead>
-            <tr>
-                <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item Name</th>
-                <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock Number</th>
-                <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-            </tr>
-        </thead>
-        <tbody id="itemsTableBody" class="bg-white divide-y divide-gray-200"></tbody>
-    </table>
-</div>
-<div id="pagination" class="mt-4 flex justify-center space-x-2"></div>
-
+    <!-- Add Item Modal -->
+    <div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
+            <h2 class="text-2xl font-bold mb-4">Add Product</h2>
+            <form id="addProductForm">
+                <div class="mb-4">
+                    <label for="productName" class="block text-gray-700">Product Name</label>
+                    <input type="text" id="productName" name="productName" class="w-full border border-gray-300 rounded px-4 py-2" required>
+                </div>
+                <div class="mb-4">
+                    <label for="price" class="block text-gray-700">Stock Number</label>
+                    <input type="number" id="price" name="Price" class="w-full border border-gray-300 rounded px-4 py-2" required>
+                </div>
+                <div class="flex justify-end">
+                    <button type="button" id="productCancelButton" class="bg-gray-500 text-white px-4 py-2 rounded mr-2" onclick="closeItemModal()">Cancel</button>
+                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

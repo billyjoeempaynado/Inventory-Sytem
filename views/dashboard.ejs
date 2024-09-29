@@ -8,85 +8,137 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <div class="flex min-h-screen bg-gray-100">
-    <!-- Sidebar -->
-    <aside class="w-64 bg-gray-800 text-white flex flex-col justify-between">
-        <div>
-            <div class="p-4 flex items-center">
-                <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-                <span class="text-xl font-semibold">Inventory System</span>
-            </div>
-            <nav class="mt-10">
-                <a href="#" data-link="items" id="itemsLink" class="flex items-center py-2 px-4 hover:bg-gray-700">
-                    <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m7-7v14" />
-                    </svg>
-                    <span>Items</span>
-                </a>
-                <a href="#" data-link="products" id="productLink" class="flex items-center py-2 px-4 hover:bg-gray-700">
-                    <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h18M3 12h18M3 17h18" />
-                    </svg>
-                    <span>Product</span>
-                </a>
-            </nav>
-        </div>
-        <div class="sm:flex p-4">
-          <a href="/users/logout" class="flex items-center py-2 px-4 hover:bg-gray-700">
-              <i class="fa-solid fa-right-from-bracket mr-2"></i> <!-- Added margin-right -->
-              <span>Logout</span>
-          </a>
-      </div>
-    </aside>
+ <!-- component -->
+<link rel="stylesheet" href="https://unpkg.com/boxicons@2.0.7/css/boxicons.min.css" />
 
-    <!-- Main content -->
-    <div id="content" class="flex-1 p-6">
-        <!-- Dynamic content will be injected here -->
-        <h2 class="text-xl font-semibold mb-4">Welcome</h2>
+<!-- component -->
+<div class="flex flex-wrap bg-gray-100 w-full h-screen">
+  
+  <div class="flex flex-col h-screen w-1/6 bg-white rounded p-3 shadow-lg">
+    <div class="p-4 flex items-center">
+      <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+      </svg>
+      <span class="text-xl font-semibold">Inventory System</span>
+  </div>
+  <nav class="flex flex-col flex-grow bg-white p-4">
+      <ul class="flex flex-col flex-grow">
+          <li class="mb-2">
+            <a href="dashboard"  class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                  </span>
+                  <span>Dashboard</span>
+              </a>
+          </li>
+          <li class="mb-2">
+              <a href="#" id="itemsButton" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                    <i class="fa-solid fa-list"></i>
+                  </span>
+                  <span>Items</span>
+              </a>
+          </li>
+          <li class="mb-2">
+              <a href="#" id="productsButton" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                    <i class="fa-solid fa-boxes-stacked"></i>
+                  </span>
+                  <span>Products</span>
+              </a>
+          </li>
+          <!-- <li>
+              <a href="#" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                  </span>
+                  <span>My profile</span>
+              </a>
+          </li>
+          <li>
+              <a href="#" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                  </span>
+                  <span>My orders</span>
+              </a>
+          </li>
+          <li>
+              <a href="" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class=" text-gray-600">
+                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                  </span>
+                  <span>My wishlist</span>
+              </a>
+          </li>
+          <li>
+              <a href="#" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                      </svg>
+                  </span>
+                  <span>Settings</span>
+              </a>
+          </li>
+          <li>
+              <a href="#" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                      </svg>
+                  </span>
+                  <span>Change password</span>
+              </a>
+          </li> -->
+          <li class="mt-auto">
+              <a href="/users/logout" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                  <span class="text-gray-600">
+                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                  </span>
+                  <span>Logout</span>
+              </a>
+          </li>
+      </ul>
+     </nav> 
+  </div>
+
+  <div class="flex-1 p-8"> <!-- Added flex-1 to take up remaining space -->
+    <div id="welcomeSection">
+        <h1 class="text-3xl font-bold">Welcome</h1>
         <p>Select an option from the sidebar to manage items or products.</p>
     </div>
-  </div>
-
-
-
-<!-- Modal Structure -->
-<div id="modal" class="fixed z-10 inset-0 overflow-y-auto hidden">
-  <div class="flex items-center justify-center min-h-screen px-4 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 transition-opacity" aria-hidden="true">
-      <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-    </div>
-
-    <!-- Modal Panel -->
-    <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-        <div class="sm:items-start">
-          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Add Item</h3>
-            <div class="mt-2">
-              <form id="modalForm">
-                <div class="mb-4">
-                  <label for="itemName" class="block text-gray-700 text-sm font-bold mb-2">Item name</label>
-                  <input type="text" id="itemName" name="itemName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                </div>
-                <div class="mb-4" id="statusDiv">
-                  <label for="status" class="block text-gray-700 text-sm font-bold mb-2">Stock</label>
-                  <select id="status" name="status" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                  </select>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    <%- include('items.ejs'); %>
+    <%- include('products.ejs'); %>
 </div>
 </div>
+<!-- <button id="clearItemsButton">Clear Items Data</button>
+<button id="clearProductsButton">Clear Products Data</button> -->
+
+<!-- <script>
+    document.getElementById('clearItemsButton').addEventListener('click', () => {
+        localStorage.removeItem('inventoryItems');  // Clears only the 'items' key
+        alert('Items data has been cleared from local storage');
+    });
+
+    document.getElementById('clearProductsButton').addEventListener('click', () => {
+        localStorage.removeItem('products');  // Clears only the 'products' key
+        alert('Products data has been cleared from local storage');
+    });
+</script> -->
 
   
-  <script type="module" src="/product/app.js"></script>
+  <script src="/product/app.js"></script>
 
 </body>
 </html>

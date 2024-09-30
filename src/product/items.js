@@ -73,7 +73,7 @@ function setupPaginationControls(totalPages, fetchFunction) {
     // Create Previous Button
     const prevButton = document.createElement('button');
     prevButton.textContent = 'Previous';
-    prevButton.className = `px-4 py-2 ${currentPage === 1 ? 'bg-gray-300' : 'bg-blue-500 text-white'}`;
+    prevButton.className = `px-4 py-2 rounded bg-gray-300 ${currentPage === 1}`;
     prevButton.disabled = currentPage === 1; // Disable if on the first page
     prevButton.addEventListener('click', () => {
       if (currentPage > 1) {
@@ -87,7 +87,7 @@ function setupPaginationControls(totalPages, fetchFunction) {
     for (let page = 1; page <= totalPages; page++) {
       const pageButton = document.createElement('button');
       pageButton.textContent = page;
-      pageButton.className = `px-4 py-2 ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`;
+      pageButton.className = `px-4 py-2 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`;
       
       pageButton.addEventListener('click', () => {
         currentPage = page;
@@ -100,7 +100,7 @@ function setupPaginationControls(totalPages, fetchFunction) {
     // Create Next Button
     const nextButton = document.createElement('button');
     nextButton.textContent = 'Next';
-    nextButton.className = `px-4 py-2 ${currentPage === totalPages ? 'bg-gray-300' : 'bg-blue-500 text-white'}`;
+    nextButton.className = `px-4 py-2 rounded bg-gray-300 ${currentPage === totalPages}`;
     nextButton.disabled = currentPage === totalPages; // Disable if on the last page
     nextButton.addEventListener('click', () => {
       if (currentPage < totalPages) {
@@ -172,6 +172,13 @@ export function deleteItem(event) {
     return;
   }
 
+  // Show a confirmation dialog before deleting
+  const userConfirmed = window.confirm('Are you sure you want to delete this item? This action cannot be undone.');
+  
+  if (!userConfirmed) {
+    return; // Exit the function if the user cancels the deletion
+  }
+
   fetch(`http://localhost:8080/api/inventory/items/items/${itemId}`, {
     method: 'DELETE'
   })
@@ -189,4 +196,5 @@ export function deleteItem(event) {
       fetchItems(); // Refresh the items list after deletion
     })
     .catch(error => console.error('Error deleting item:', error));
+
 }

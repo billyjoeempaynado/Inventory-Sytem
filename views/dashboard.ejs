@@ -6,6 +6,7 @@
   <title>Inventory System</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
 </head>
 <body>
  <!-- component -->
@@ -122,10 +123,13 @@
     <%- include('products.ejs'); %>
 </div>
 </div>
-<!-- <button id="clearItemsButton">Clear Items Data</button>
-<button id="clearProductsButton">Clear Products Data</button> -->
 
-<!-- <script>
+<div id="paginationControls" class="pagination-controls"></div> <!-- Ensure this is included -->
+
+<!-- <button id="clearItemsButton">Clear Items Data</button>
+<button id="clearProductsButton">Clear Products Data</button>
+
+<script>
     document.getElementById('clearItemsButton').addEventListener('click', () => {
         localStorage.removeItem('inventoryItems');  // Clears only the 'items' key
         alert('Items data has been cleared from local storage');
@@ -138,7 +142,12 @@
 </script> -->
 
   
-  <script src="/product/app.js"></script>
+
+  <script type="module" src="/product/app.js"></script>
+  <script type="module" src="/product/items.js"></script>
+  <script type="module" src="/product/products.js"></script>
+
+
 
 </body>
 </html>

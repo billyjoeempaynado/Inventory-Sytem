@@ -119,64 +119,103 @@ function setupPaginationControls(totalPages, fetchFunction) {
   
     const item_name = document.querySelector('input[name="itemName"]').value;
     const stock_number = document.querySelector('input[name="stockNumber"]').value;
-
+  
     fetch('http://localhost:8080/api/inventory/items/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ item_name, stock_number })
       })
-        .then(response => {
-          // Try to parse the response as JSON, but if it fails, return plain text
-          return response.text().then(text => {
-            try {
-              return JSON.parse(text);  // If it's JSON, parse it
-            } catch (error) {
-              return text;  // If it's plain text, return the raw text
-            }
-          });
-        })
-        .then(result => {
-          if (typeof result === 'object' && result.item) {
-            // JSON response case: Item was added and returned in JSON format
-            console.log('Item added successfully:', result.item);
-            
-            // Add the new item to local storage
-            const savedItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-            savedItems.push(result.item);
-            localStorage.setItem('inventoryItems', JSON.stringify(savedItems));
-            
-            fetchItems();  // Refresh the items list
-          } else {
-            // Plain text response case: Server sent a message instead of JSON
-            console.log('Server message:', result);  // Log the plain text response
-            
-            // Optionally, fetch items from the server to get the latest list
-            fetchItems();
+      .then(response => {
+        return response.text().then(text => {
+          try {
+            return JSON.parse(text);
+          } catch (error) {
+            return text;
           }
-      
-          // Close the modal and reset the form
-          closeItemModal();
-          addItemForm.reset();
-        })
-        .catch(error => console.error('Error adding item:', error));
-      
+        });
+      })
+      .then(result => {
+        if (typeof result === 'object' && result.item) {
+          console.log('Item added successfully:', result.item);
+  
+       
+          const savedItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
+          savedItems.push(result.item);
+          localStorage.setItem('inventoryItems', JSON.stringify(savedItems));
+  
+          fetchItems();  // Refresh the items list
+        } else {
+          console.log('Server message:', result);
+          fetchItems();
+        }
+  
+        // Close the modal and reset the form
+        closeItemModal();
+        showAlertMessage('Item added successfully!', 'success');
+        addItemForm.reset();
+      })
+      .catch(error => console.error('Error adding item:', error));
+  });
+  
+
+  function showAlertMessage(message, type) {
+    const alertMessage = document.getElementById("alertMessage");
+  
+    if (alertMessage) {
+      // Set the alert message text
+      alertMessage.querySelector('span').textContent = message;
+  
+      // Remove existing classes
+      alertMessage.classList.remove("hidden", "bg-green-100", "border-green-400", "text-green-700", "bg-red-100", "border-red-400", "text-red-700");
+  
+      // Add appropriate classes based on alert type
+      if (type === 'success') {
+        alertMessage.classList.add("bg-green-100", "border-green-400", "text-green-700");
+      } else if (type === 'danger') {
+        alertMessage.classList.add("bg-red-100", "border-red-400", "text-red-700");
+      }
+  
+      // Show the alert
+      alertMessage.classList.remove("hidden");
+  
+      // Auto-hide the alert after 3 seconds
+      setTimeout(() => {
+        alertMessage.classList.add("hidden");
+      }, 3000);
+    } else {
+      console.error("Alert message element not found.");
+    }
+  }
+  
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const alertMessage = document.getElementById("alertMessage");
+  if (!alertMessage) {
+    console.error("Alert message element not found.");
+  }
+});
+
+
+// Function to close the alert manually
+document.getElementById("closeAlert").addEventListener("click", function() {
+  document.getElementById("alertMessage").classList.add("hidden");
 });
   
 
 
 // Function to delete an item
 export function deleteItem(event) {
-  const itemId = event.target.closest('button').getAttribute('data-id'); // Fixing the itemId fetching
+  const itemId = event.target.closest('button').getAttribute('data-id');
   if (!itemId) {
     console.error('No item ID found to delete.');
     return;
   }
 
-  // Show a confirmation dialog before deleting
   const userConfirmed = window.confirm('Are you sure you want to delete this item? This action cannot be undone.');
-  
+
   if (!userConfirmed) {
-    return; // Exit the function if the user cancels the deletion
+    return; // Exit if the user cancels
   }
 
   fetch(`http://localhost:8080/api/inventory/items/items/${itemId}`, {
@@ -188,13 +227,17 @@ export function deleteItem(event) {
       }
       console.log('Item deleted successfully.');
 
+      // Show the red danger alert
+      showAlertMessage('Item deleted successfully!', 'danger');  // <-- Red for delete
+
       // Remove the item from localStorage
       let savedItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-      savedItems = savedItems.filter(item => item.id !== Number(itemId)); // Ensure matching ID type
+      savedItems = savedItems.filter(item => item.id !== Number(itemId));
       localStorage.setItem('inventoryItems', JSON.stringify(savedItems));
 
-      fetchItems(); // Refresh the items list after deletion
+      fetchItems();  // Refresh the items list after deletion
     })
     .catch(error => console.error('Error deleting item:', error));
-
 }
+
+

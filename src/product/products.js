@@ -2,7 +2,7 @@ function closeProductModal() { productModal.classList.add('hidden'); }
 productCancelButton.onclick = closeProductModal;
 
 let currentPage = 1;
-const productsPerPage = 5;
+const productsPerPage = 6;
 
 
 export function fetchProducts() {
@@ -66,123 +66,168 @@ function paginate(products, page, productsPerPage) {
 }
 
 function setupPaginationControls(totalPages, fetchProductsCallback) {
-  const paginationControls = document.getElementById('paginationControls');
-  paginationControls.innerHTML = ''; // Clear existing pagination buttons
+  const prevButton = document.getElementById('prevPageButton');
+  const nextButton = document.getElementById('nextPageButton');
+  const pageButtonsContainer = document.getElementById('pageButtons');
 
-  console.log('Total pages:', totalPages); // Debugging
-
-   // Previous Button
-  const prevButton = document.createElement('button');
-  prevButton.textContent = 'Previous';
-  prevButton.className = 'px-4 py-2';
+  // Update the state of the "Previous" and "Next" buttons
   prevButton.disabled = currentPage === 1;
+  nextButton.disabled = currentPage === totalPages;
+
+  // Clear the existing page number buttons
+  pageButtonsContainer.innerHTML = '';
+
+  // Create page number buttons dynamically
+  for (let page = 1; page <= totalPages; page++) {
+    const pageButton = document.createElement('button');
+    pageButton.textContent = page;
+    pageButton.className = `px-4 py-2 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`;
+
+    pageButton.addEventListener('click', () => {
+      currentPage = page;
+      fetchProductsCallback(); // Fetch the products for the selected page
+    });
+
+    pageButtonsContainer.appendChild(pageButton);
+  }
+
+  // Set up the "Previous" button click handler
   prevButton.onclick = () => {
     if (currentPage > 1) {
       currentPage--;
       fetchProductsCallback(); // Refresh products for the previous page
     }
   };
-  paginationControls.appendChild(prevButton);
 
-   // Numbered Buttons
-   for (let page = 1; page <= totalPages; page++) {
-    console.log('Creating button for page:', page); // Debugging
-
-    const pageButton = document.createElement('button');
-    pageButton.textContent = page;
-    pageButton.className = `px-4 py-2 ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`;
-    
-    pageButton.addEventListener('click', () => {
-      currentPage = page;
-      fetchProductsCallback(); // Refresh products for the new page
-    });
-
-    paginationControls.appendChild(pageButton);
-  }
-
-  // Next Button
-  const nextButton = document.createElement('button');
-  nextButton.textContent = 'Next';
-  nextButton.className = 'px-4 py-2';
-  nextButton.disabled = currentPage === totalPages;
+  // Set up the "Next" button click handler
   nextButton.onclick = () => {
     if (currentPage < totalPages) {
       currentPage++;
       fetchProductsCallback(); // Refresh products for the next page
     }
   };
-  paginationControls.appendChild(nextButton);
 }
 
- 
 
 // Add product modal logic
 const addProductForm = document.getElementById('addProductForm');
 addProductForm.addEventListener('submit', function (e) {
-    e.preventDefault();
+  e.preventDefault();
 
-    const product_name = document.querySelector('input[name="productName"]').value;
+  const product_name = document.querySelector('input[name="productName"]').value;
     const price = document.querySelector('input[name="price"]').value;
 
-    fetch('http://localhost:8080/api/inventory/products/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product_name, price })
+   fetch('http://localhost:8080/api/inventory/products/products', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_name, price })
     })
-        .then(response => {
-            return response.text().then(text => {
-                try {
-                    return JSON.parse(text);  // Try to parse JSON response
-                } catch (error) {
-                    return text;  // Return plain text if parsing fails
-                }
-            });
-        })
-        .then(result => {
-            if (typeof result === 'object' && result.product) {
-                console.log('Product added successfully:', result.product);
-                const savedProducts = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
-                savedProducts.push(result.product);
-                localStorage.setItem('inventoryProducts', JSON.stringify(savedProducts));
-                fetchProducts();  // Refresh the products list
-            } else {
-                console.log('Server message:', result);
-                fetchProducts(); // Refresh the products list in case of server message
-            }
-            closeProductModal();
-            addProductForm.reset();
-        })
-        .catch(error => console.error('Error adding product:', error));
+    .then(response => {
+      return response.text().then(text => {
+        try {
+          return JSON.parse(text);
+        } catch (error) {
+          return text;
+        }
+      });
+    })
+    .then(result => {
+      if (typeof result === 'object' && result.product) {
+        console.log('Product added successfully:', result.product);
+
+
+        const savedProducts = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
+        savedProducts.push(result.product);
+        localStorage.setItem('inventoryProducts', JSON.stringify(savedProducts));
+        fetchProducts(); // Refresh the items list
+      } else {
+        console.log('Server message:', result);
+        fetchProducts();
+      }
+
+      // Close the modal and reset the form
+      closeProductModal();
+      showAlertMessage('Product added successfully!', 'success');
+      addProductForm.reset();
+    })
+    .catch(error => console.error('Error adding product:', error));
+});
+
+function showAlertMessage(message, type) {
+  const alertMessage = document.getElementById("productAlertMessage");
+
+  if (alertMessage) {
+    // Set the alert message text
+    alertMessage.querySelector('span').textContent = message;
+
+    // Remove existing classes
+    alertMessage.classList.remove("hidden", "bg-green-100", "border-green-400", "text-green-700", "bg-red-100", "border-red-400", "text-red-700");
+
+    // Add appropriate classes based on alert type
+    if (type === 'success') {
+      alertMessage.classList.add("bg-green-100", "border-green-400", "text-green-700");
+    } else if (type === 'danger') {
+      alertMessage.classList.add("bg-red-100", "border-red-400", "text-red-700");
+    }
+
+    // Show the alert
+    alertMessage.classList.remove("hidden");
+
+    // Auto-hide the alert after 3 seconds
+    setTimeout(() => {
+      alertMessage.classList.add("hidden");
+    }, 3000);
+  } else {
+    console.error("Alert message element not found.");
+  }
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const alertMessage = document.getElementById("productAlertMessage");
+  if (!alertMessage) {
+    console.error("Alert message element not found.");
+  }
+});
+
+
+// Function to close the alert manually
+document.getElementById("productCloseAlert").addEventListener("click", function() {
+  document.getElementById("productAlertMessage").classList.add("hidden");
 });
 
 // Function to delete a product
 export function deleteProduct(event) {
-    const productId = event.target.closest('button').getAttribute('data-id');
-    if (!productId) {
-        console.error('No Product ID found to delete.');
-        return;
-    }
+  const productId = event.target.closest('button').getAttribute('data-id');
+  if (!productId) {
+    console.error('No Product ID found to delete.');
+    return;
+  }
 
-    fetch(`http://localhost:8080/api/inventory/products/products/${productId}`, {
-        method: 'DELETE'
+  const userConfirmed = window.confirm('Are you sure you want to delete this item? This action cannot be undone.');
+
+  if (!userConfirmed) {
+    return; // Exit if the user cancels
+  }
+
+  fetch(`http://localhost:8080/api/inventory/products/products/${productId}`, {
+    method: 'DELETE'
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      console.log('Product deleted successfully.');
+
+      // Show the red danger alert
+      showAlertMessage('Product deleted successfully!', 'danger');  // <-- Red for delete
+
+      // Remove the item from localStorage
+      let savedProducts = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
+      savedProducts = savedProducts.filter(product => product.id !== Number(productId));
+      localStorage.setItem('inventoryProducts', JSON.stringify(savedProducts));
+
+      fetchProducts();  // Refresh the items list after deletion
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            console.log('Product deleted successfully.');
-
-            // Remove the product from localStorage
-            let savedProducts = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
-            savedProducts = savedProducts.filter(product => product.id !== Number(productId));
-            localStorage.setItem('inventoryProducts', JSON.stringify(savedProducts));
-
-            fetchProducts(); // Refresh the products list after deletion
-        })
-        .catch(error => console.error('Error deleting product:', error));
+    .catch(error => console.error('Error deleting item:', error));
 }
-
-// Initial fetch of products on page load
-document.addEventListener('DOMContentLoaded', () => {
-    fetchProducts();
-});

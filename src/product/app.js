@@ -1,5 +1,6 @@
-import { fetchItems, displayItems, deleteItem } from './items.js';
+import { fetchItems, displayItems, deleteItem} from './items.js';
 import { fetchProducts, displayProducts, deleteProduct } from './products.js';
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const itemsSection = document.getElementById('itemsSection');
@@ -10,7 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const productsButton = document.getElementById('productsButton');
     const itemCancelButton = document.getElementById('itemCancelButton');
     const productCancelButton = document.getElementById('productCancelButton');
-  
+
+
+   
+
     const itemModal = document.getElementById('itemModal');
     const productModal = document.getElementById('productModal');
     
@@ -40,10 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
       addProductButton.addEventListener('click', openProductModal);
     
 
-    itemsButton.addEventListener('click', fetchItems);
-    productsButton.addEventListener('click', fetchProducts);
+      itemsButton.addEventListener('click', fetchItems);
+      productsButton.addEventListener('click', fetchProducts);
 
+    
     // Initialize default view
     fetchItems();
     fetchProducts();
+
+    
 });

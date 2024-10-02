@@ -322,41 +322,44 @@ document.getElementById("closeAlert").addEventListener("click", function() {
     document.getElementById("alertMessage").classList.add("hidden");
 });
 
-// Function to delete an item
 export function deleteItem(event) {
-    const itemId = event.target.closest('button').getAttribute('data-id');
-    if (!itemId) {
-        console.error('No item ID found to delete.');
-        return;
-    }
+  const itemId = event.target.closest('button').getAttribute('data-id');
+  if (!itemId) {
+      console.error('No item ID found to delete.');
+      return;
+  }
 
-    const userConfirmed = window.confirm('Are you sure you want to delete this item? This action cannot be undone.');
+  // Show confirmation dialog
+  alertify.confirm("Are you sure you want to delete this item?",
+  function(){  // User clicked 'Ok'
+      // Proceed to delete the item
+      fetch(`http://localhost:8080/api/inventory/items/items/${itemId}`, {
+          method: 'DELETE'
+      })
+      .then(response => {
+          if (!response.ok) {
+              throw new Error('Network response was not ok');
+          }
+          console.log('Item deleted successfully.');
 
-    if (!userConfirmed) {
-        return; // Exit if the user cancels
-    }
+          // Show the red danger alert
+          showAlertMessage('Item deleted successfully!', 'danger'); // Red for delete
 
-    fetch(`http://localhost:8080/api/inventory/items/items/${itemId}`, {
-        method: 'DELETE'
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        console.log('Item deleted successfully.');
+          // Remove the item from localStorage
+          let savedItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
+          savedItems = savedItems.filter(item => item.id !== Number(itemId));
+          localStorage.setItem('inventoryItems', JSON.stringify(savedItems));
 
-        // Show the red danger alert
-        showAlertMessage('Item deleted successfully!', 'danger'); // Red for delete
-
-        // Remove the item from localStorage
-        let savedItems = JSON.parse(localStorage.getItem('inventoryItems')) || [];
-        savedItems = savedItems.filter(item => item.id !== Number(itemId));
-        localStorage.setItem('inventoryItems', JSON.stringify(savedItems));
-
-        fetchItems(); // Refresh the items list after deletion
-    })
-    .catch(error => console.error('Error deleting item:', error));
+          // Refresh the items list after deletion
+          fetchItems(); 
+      })
+      .catch(error => console.error('Error deleting item:', error));
+  },
+  function(){  // User clicked 'Cancel'
+      alertify.error('Delete action canceled.');
+  });
 }
+
 
 alertify.set('notifier', 'position', 'top-right');  // Set position of notifications
 alertify.set('notifier', 'delay', 3); 

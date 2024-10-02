@@ -61,7 +61,7 @@ const deleteProduct = (req, res) => {
 
 const updateProduct = (req, res) => {
   const id = parseInt(req.params.id);
-  const { product_name } = req.body;
+  const { product_name, price } = req.body;
 
   pool.query(queries.getProductById, [id], (error, results) => {
     if (error) {
@@ -73,7 +73,7 @@ const updateProduct = (req, res) => {
       return res.status(404).send("Product does not exist in the database");
     }
 
-    pool.query(queries.updateProduct, [product_name, id], (error, results) => {
+    pool.query(queries.updateProduct, [product_name, price, id], (error, results) => {
       if (error) {
         return res.status(500).json({ error: "Failed to update product" });
       }

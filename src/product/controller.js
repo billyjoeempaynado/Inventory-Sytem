@@ -61,7 +61,7 @@ const deleteItem = (req, res) => {
 
 const updateItem = (req, res) => {
   const id = parseInt(req.params.id);
-  const {item_name} = req.body;
+  const {item_name, stock_number} = req.body;
 
   pool.query(queries.getItemById, [id], (error, results) => {
     const noItemFound = !results.rows.length;
@@ -69,7 +69,7 @@ const updateItem = (req, res) => {
     res.send("Item does not exist in the database");
      }
 
-     pool.query(queries.updateItem, [item_name, id], (error,results) => {
+     pool.query(queries.updateItem, [item_name, stock_number, id], (error,results) => {
       if (error) throw error;
       res.status(200).send("Item updated succesfully");
      });

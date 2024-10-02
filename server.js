@@ -130,6 +130,16 @@ app.post("/users/login", passport.authenticate("local", {
     failureFlash: true
 }));
 
+app.post('/api/inventory/items/items', (req, res) => {
+    const { item_name, stock_number } = req.body;
+    // Logic to save the item in the database, e.g., 
+    // const newItem = await Item.create({ item_name, stock_number });
+    const newItem = { id: 123, item_name, stock_number }; // Simulated item creation
+
+    // Send back the newly created item as JSON
+    res.status(201).json(newItem); // 201 Created
+});
+
 
 
 function checkAuthenticated(req, res, next) {
@@ -145,6 +155,8 @@ function checkNotAuthenticated(req, res, next) {
     }
     res.redirect("/users/login");
 }
+
+
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

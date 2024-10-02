@@ -1,4 +1,3 @@
-// items.js
 
 let currentPage = 1;
 const itemsPerPage = 6; // Adjust as needed
@@ -19,10 +18,10 @@ export function fetchItems() {
         .catch(error => console.error('Error fetching items:', error));
 }
 
-document.getElementById('searchInput').addEventListener('input', searchItems);
+document.getElementById('searchItemInput').addEventListener('input', searchItems);
 
 export function searchItems() {
-  const searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+  const searchQuery = document.getElementById('searchItemInput').value.trim().toLowerCase();
   const items = JSON.parse(localStorage.getItem('inventoryItems')) || [];
 
   const filteredItems = items.filter(item => 
@@ -137,7 +136,7 @@ function attachItemEventListeners() {
           const itemToEdit = items.find(item => item.id === Number(itemId));
           if (itemToEdit) {
               // Open the modal and populate fields with the existing item data
-              openEditModal(itemId, itemToEdit.item_name, itemToEdit.stock_number);
+              openEditItemModal(itemId, itemToEdit.item_name, itemToEdit.stock_number);
           } else {
               console.error('Item not found:', itemId);
           }
@@ -152,7 +151,7 @@ function attachItemEventListeners() {
 
 
 // Reusable modal functions
-export function openAddModal() {
+export function openAddItemModal() {
   const itemForm = document.getElementById('itemForm');
   itemForm.setAttribute('data-mode', 'add');  // Set form mode to 'add'
   console.log('Form mode set to:', itemForm.getAttribute('data-mode'));  // Debugging log
@@ -176,7 +175,7 @@ export function openAddModal() {
 
 
 // Function to open the Item Modal (for both Add and Edit)
-export function openEditModal(itemId, itemName, stockNumber) {
+export function openEditItemModal(itemId, itemName, stockNumber) {
   const itemForm = document.getElementById('itemForm');
   itemForm.setAttribute('data-mode', 'edit');  // Set form mode to 'edit'
   itemForm.setAttribute('data-id', itemId);    // Set the form's data-id to the itemId
@@ -318,7 +317,7 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 // Function to close the alert manually
-document.getElementById("closeAlert").addEventListener("click", function() {
+document.getElementById("closeItemAlert").addEventListener("click", function() {
     document.getElementById("alertMessage").classList.add("hidden");
 });
 

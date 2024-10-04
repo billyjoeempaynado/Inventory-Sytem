@@ -51,13 +51,18 @@ app.get("/", (req, res) => {
 });
 
 // Route to render items page
-app.get('/', (req, res) => {
-    res.render('items'); // Renders items.ejs
+app.get('/items', (req, res) => {
+    res.render('items');  // Render the items.ejs view
+});
+
+// Route to render items page
+app.get('/products', (req, res) => {
+    res.render('products'); // Renders items.ejs
 });
 
 // Route to render items page
 app.get('/', (req, res) => {
-    res.render('products'); // Renders items.ejs
+    res.render('index'); // Renders items.ejs
 });
 
 app.get("/users/register", checkAuthenticated, (req, res) => {
@@ -130,15 +135,26 @@ app.post("/users/login", passport.authenticate("local", {
     failureFlash: true
 }));
 
-app.post('/api/inventory/items/items', (req, res) => {
-    const { item_name, stock_number } = req.body;
-    // Logic to save the item in the database, e.g., 
-    // const newItem = await Item.create({ item_name, stock_number });
-    const newItem = { id: 123, item_name, stock_number }; // Simulated item creation
-
-    // Send back the newly created item as JSON
-    res.status(201).json(newItem); // 201 Created
-});
+// API endpoint to get item and product counts
+app.get('/api/counts', async (req, res) => {
+    try {
+      const itemCountQuery = 'SELECT COUNT(*) AS item_count FROM items';
+      const productCountQuery = 'SELECT COUNT(*) AS product_count FROM products';
+  
+      const itemCountResult = await pool.query(itemCountQuery);
+      const productCountResult = await pool.query(productCountQuery);
+  
+      const itemCount = itemCountResult.rows[0].item_count;
+      const productCount = productCountResult.rows[0].product_count;
+  
+      res.json({ itemCount, productCount });
+    } catch (err) {
+      console.error('Error occurred while fetching counts:', err);
+      res.status(500).json({ error: 'Error retrieving counts', details: err.message });
+    }
+  });
+  
+  
 
 
 
@@ -155,8 +171,6 @@ function checkNotAuthenticated(req, res, next) {
     }
     res.redirect("/users/login");
 }
-
-
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);

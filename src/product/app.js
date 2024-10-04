@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const welcomeSection = document.getElementById('welcomeSection');
 
     /// buttons on dashboard
+    const itemsButtonDashboard = document.getElementById('itemsViewButton');
+    const productsButtonDashboard = document.getElementById('productsViewButton');
     const itemsButton = document.getElementById('itemsButton');
     const productsButton = document.getElementById('productsButton');
 
@@ -31,21 +33,31 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       // click funtion when click items and product button on dashboard
+      itemsButtonDashboard.addEventListener('click', () => {
+        showSection(itemsSection);
+        fetchItems(); // Call fetch items when the button is clicked
+       });
+
       itemsButton.addEventListener('click', () => {
         showSection(itemsSection);
         fetchItems();
        });
+
        productsButton.addEventListener('click', () => {
         showSection(productsSection);
         fetchProducts();
-      });
+       });
+
+       productsButtonDashboard.addEventListener('click', () => {
+        showSection(productsSection);
+        fetchItems(); // Call fetch items when the button is clicked
+       });
 
         // Initially show welcome section
        showSection(welcomeSection);
       
       // function for open and close of each modal
-      function closeItemModal() { itemModal.classList.add('hidden'); }
-      function openProductModal() { productModal.classList.remove('hidden'); }
+      function closeItemModal() { itemModal.classList.add('hidden'); }  
       function closeProductModal() { productModal.classList.add('hidden'); }
       
 
@@ -77,6 +89,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize default view
     fetchItems();
     fetchProducts();
-
+      
+    fetch('http://localhost:8080/api/counts')
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      // Update the page with the fetched counts
+      document.getElementById('itemCount').textContent = data.itemCount;
+      document.getElementById('productCount').textContent = data.productCount;
+    })
+    .catch(error => {
+      console.error('Error fetching counts:', error);
+      document.getElementById('itemCount').textContent = 'Error';
+      document.getElementById('productCount').textContent = 'Error';
+    });
+  
     
 });

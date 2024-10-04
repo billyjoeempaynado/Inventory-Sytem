@@ -18,6 +18,17 @@ export function fetchProducts() {
         .catch(error => console.error('Error fetching products:', error));
 }
 
+function debounce(func, delay) {
+  let timer;
+  return function (...args) {
+      const context = this;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+          func.apply(context, args);
+      }, delay);
+  };
+}
+
 document.getElementById('searchProductInput').addEventListener('input', searchProducts);
 
 export function searchProducts() {
@@ -36,6 +47,11 @@ export function searchProducts() {
   displayProducts(filteredProducts);
 }
 
+const debouncedSearchProducts = debounce(searchProducts, 300); // 300ms delay
+
+// Attach the debounced function to the input event
+document.getElementById('searchProductInput').addEventListener('input', debouncedSearchProducts);
+
 export function displayProducts(products) {
   const totalPages = Math.ceil(products.length / productsPerPage);
   const paginatedProducts = paginate(products, currentPage, productsPerPage);
@@ -46,10 +62,15 @@ export function displayProducts(products) {
       tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No product found.</td></tr>';
   } else {
       paginatedProducts.forEach(product => {
+        
           const row = document.createElement('tr');
+
           row.innerHTML = `
               <td class="py-4 px-6 text-sm font-medium text-gray-900">${product.product_name}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">${product.price}</td>
+              <td class="py-4 px-6 text-sm text-gray-500">  &#8369; ${product.price}</td>
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
               <td class="sm:flex py-4 px-6 text-sm">
                   <button data-id="${product.id}" class="edit-product-btn p-2 text-gray-700 hover:text-gray-500">
                       <i class="fa-solid fa-pen-to-square"></i>
@@ -80,48 +101,49 @@ function paginate(products, page, productsPerPage) {
 }
 
 function setupPaginationControls(totalPages, fetchProductsCallback) {
-  const prevButton = document.getElementById('prevPageButton');
-  const nextButton = document.getElementById('nextPageButton');
-  const pageButtonsContainer = document.getElementById('pageButtons');
+  const productPaginationControls = document.getElementById('productPaginationControls');
+  productPaginationControls.innerHTML = ''; // Clear existing buttons
 
-  // Update the state of the "Previous" and "Next" buttons
-  prevButton.disabled = currentPage === 1;
-  nextButton.disabled = currentPage === totalPages;
+   // Previous Button
+   const productPrevButton = document.createElement('button');
+   productPrevButton.textContent = 'Previous';
+   productPrevButton.className = `px-4 py-2 rounded bg-gray-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`;
+   productPrevButton.disabled = currentPage === 1;
+   productPrevButton.addEventListener('click', () => {
+       if (currentPage > 1) {
+           currentPage--;
+           fetchProductsCallback();
+       }
+   });
+   productPaginationControls.appendChild(productPrevButton);
 
-  // Clear the existing page number buttons
-  pageButtonsContainer.innerHTML = '';
+   // Page Number Buttons
+   for (let page = 1; page <= totalPages; page++) {
+       const productPageButton = document.createElement('button');
+       productPageButton.textContent = page;
+       productPageButton.className = `px-4 py-2 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`;
+       
+       productPageButton.addEventListener('click', () => {
+           currentPage = page;
+           fetchProductsCallback();
+       });
 
-  // Create page number buttons dynamically
-  for (let page = 1; page <= totalPages; page++) {
-    const pageButton = document.createElement('button');
-    pageButton.textContent = page;
-    pageButton.className = `px-4 py-2 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`;
+      productPaginationControls.appendChild(productPageButton);
+   } 
 
-    pageButton.addEventListener('click', () => {
-      currentPage = page;
-      fetchProductsCallback(); // Fetch the products for the selected page
-    });
-
-    pageButtonsContainer.appendChild(pageButton);
-  }
-
-  // Set up the "Previous" button click handler
-  prevButton.onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      fetchProductsCallback(); // Refresh products for the previous page
-    }
-  };
-
-  // Set up the "Next" button click handler
-  nextButton.onclick = () => {
-    if (currentPage < totalPages) {
-      currentPage++;
-      fetchProductsCallback(); // Refresh products for the next page
-    }
-  };
+   // Next Button
+   const productNextButton = document.createElement('button');
+   productNextButton.textContent = 'Next';
+   productNextButton.className = `px-4 py-2 rounded bg-gray-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`;
+   productNextButton.disabled = currentPage === totalPages;
+   productNextButton.addEventListener('click', () => {
+       if (currentPage < totalPages) {
+           currentPage++;
+           fetchProductsCallback();
+       }
+   });
+   productPaginationControls.appendChild(productNextButton);
 }
-
 // Attach event listeners for edit and delete buttons
 function attachProductEventListeners() {
   // Edit Buttons

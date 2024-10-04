@@ -18,6 +18,17 @@ export function fetchItems() {
         .catch(error => console.error('Error fetching items:', error));
 }
 
+function debounce(func, delay) {
+  let timer;
+  return function (...args) {
+      const context = this;
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+          func.apply(context, args);
+      }, delay);
+  };
+}
+
 document.getElementById('searchItemInput').addEventListener('input', searchItems);
 
 export function searchItems() {
@@ -36,6 +47,11 @@ export function searchItems() {
   displayItems(filteredItems);
 }
 
+const debouncedSearchItems = debounce(searchItems, 300); // 300ms delay
+
+// Attach the debounced function to the input event
+document.getElementById('searchItemInput').addEventListener('input', debouncedSearchItems);
+
 
 export function displayItems(items) {
   const totalPages = Math.ceil(items.length / itemsPerPage);
@@ -51,6 +67,9 @@ export function displayItems(items) {
           row.innerHTML = `
               <td class="py-4 px-6 text-sm font-medium text-gray-900">${item.item_name}</td>
               <td class="py-4 px-6 text-sm text-gray-500">${item.stock_number}</td>
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
               <td class="sm:flex py-4 px-6 text-sm">
                   <button data-id="${item.id}" class="edit-item-btn p-2 text-gray-700 hover:text-gray-500">
                       <i class="fa-solid fa-pen-to-square"></i>

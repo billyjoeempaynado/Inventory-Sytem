@@ -92,8 +92,8 @@
                   </span>
                   <span>Settings</span>
               </a>
-          </li>
-          <li>
+          </li> -->
+          <li class="mt-60">
               <a href="#" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
                   <span class="text-gray-600">
                       <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -102,7 +102,7 @@
                   </span>
                   <span>Change password</span>
               </a>
-          </li> -->
+          </li>
           <li class="mt-auto">
               <a href="/users/logout" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
                   <span class="text-gray-600">
@@ -119,8 +119,48 @@
 
   <div class="flex-1 p-8"> <!-- Added flex-1 to take up remaining space -->
     <div id="welcomeSection">
-        <h1 class="text-3xl font-bold">Welcome</h1>
-        <p>Select an option from the sidebar to manage items or products.</p>
+        <div class="p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-6">
+              <!-- Items Section -->
+              <div class="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
+                <div class="flex justify-between mb-6">
+                  <div>
+                    <div class="flex items-center mb-1">
+                      <div id="itemCount" class="text-2xl font-semibold">Loading...</div>
+                    </div>
+                    <div class="text-sm font-medium text-gray-400">Items</div>
+                  </div>
+                  <i class="fa-solid fa-list text-4xl"></i>
+                </div>
+                <a href="#" id="itemsViewButton" class="text-[#f84525] font-medium text-sm hover:text-red-800">View</a>
+              </div>
+        
+              <!-- Products Section -->
+              <div class="bg-white rounded-md border border-gray-100 p-6 shadow-md shadow-black/5">
+                <div class="flex justify-between mb-4">
+                  <div>
+                    <div class="flex items-center mb-1">
+                      <div id="productCount" class="text-2xl font-semibold">Loading...</div>
+                    </div>
+                    <div class="text-sm font-medium text-gray-400">Products</div>
+                  </div>
+                  <i class="fa-solid fa-boxes-stacked text-4xl"></i>
+                </div>
+                <a href="#" id="productsViewButton" class="text-[#f84525] font-medium text-sm hover:text-red-800">View</a>
+              </div>
+            </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-1  mb-6">
+                <div class="bg-white border border-gray-100 shadow-md shadow-black/5 p-6 rounded-md lg:col-span-2">
+                    <div class="flex justify-between mb-4 items-start">
+                        <div class="font-medium">Order Statistics</div>
+                         
+                        
+                    </div>
+                </div>
+            </div>
+                    
     </div>
     <%- include('items.ejs'); %>
     <%- include('products.ejs'); %>

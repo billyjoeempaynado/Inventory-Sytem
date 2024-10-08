@@ -9,8 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const welcomeSection = document.getElementById('welcomeSection');
 
     /// buttons on dashboard
-  const itemsButtonDashboard = document.getElementById('itemsViewButton');
-  const productsButtonDashboard = document.getElementById('productsViewButton');
+  const productsButtonDashboard = document.getElementById('productsViewButton');  
   const suppliersButton = document.getElementById('suppliersButton');
   const ordersButton = document.getElementById('ordersButton');
   const productsButton = document.getElementById('productsButton');
@@ -39,7 +38,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (suppliersButton) {
       suppliersButton.addEventListener('click', () => {
-        console.log('Supplier button clicked');
           showSection(suppliersSection);
       });
   }

@@ -8,7 +8,7 @@ const passport = require("passport");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 
-const itemRoutes = require("./src/product/routes");
+
 const userRoutes = require("./src/product/userRoutes");
 const productRoutes = require("./src/product/productRoutes");
 
@@ -41,7 +41,7 @@ app.use(passport.session());
 app.use(flash());
 
 // Routes
-app.use("/api/inventory/items", itemRoutes); 
+
 app.use("/api/inventory/products", productRoutes);
 app.use("/api/v1/users", userRoutes);
 
@@ -50,17 +50,23 @@ app.get("/", (req, res) => {
     res.render("login");
 });
 
+
 // Route to render items page
-app.get('/items', (req, res) => {
-    res.render('items');  // Render the items.ejs view
+app.get('/orders', (req, res) => {
+    res.render('orders');  // Render the order.ejs view
+});
+
+// Route to render items page
+app.get('/suppliers', (req, res) => {
+    res.render('suppliers');  // Render the supplier.ejs view
 });
 
 // Route to render items page
 app.get('/products', (req, res) => {
-    res.render('products'); // Renders items.ejs
+    res.render('products'); // Renders product.ejs
 });
 
-// Route to render items page
+
 app.get('/', (req, res) => {
     res.render('index'); // Renders items.ejs
 });

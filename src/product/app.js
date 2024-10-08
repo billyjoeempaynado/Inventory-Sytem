@@ -1,93 +1,88 @@
-import { fetchItems, openAddItemModal, searchItems, openEditItemModal, deleteItem } from './items.js';
 import { fetchProducts, openAddProductModal, searchProducts, openEditProductModal, deleteProduct } from './products.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // get div class of each section
-    const itemsSection = document.getElementById('itemsSection');
-    const productsSection = document.getElementById('productsSection');
-    const welcomeSection = document.getElementById('welcomeSection');
+  // get div class of each section
+  const productsSection = document.getElementById('productsSection');
+  const suppliersSection = document.getElementById('suppliersSection');
+  const ordersSection = document.getElementById('ordersSection');
+  const welcomeSection = document.getElementById('welcomeSection');
 
     /// buttons on dashboard
-    const itemsButtonDashboard = document.getElementById('itemsViewButton');
-    const productsButtonDashboard = document.getElementById('productsViewButton');
-    const itemsButton = document.getElementById('itemsButton');
-    const productsButton = document.getElementById('productsButton');
+  const itemsButtonDashboard = document.getElementById('itemsViewButton');
+  const productsButtonDashboard = document.getElementById('productsViewButton');
+  const suppliersButton = document.getElementById('suppliersButton');
+  const ordersButton = document.getElementById('ordersButton');
+  const productsButton = document.getElementById('productsButton');
 
-    // should button for cancel
-    const itemCancelButton = document.getElementById('itemCancelButton');
-    const productCancelButton = document.getElementById('productCancelButton');
+   // should button for cancel
+  const productCancelButton = document.getElementById('productCancelButton');
 
+  // call for modal ID
+  const productModal = document.getElementById('productModal');
 
-   
-    // call for modal ID
-    const itemModal = document.getElementById('itemModal');
-    const productModal = document.getElementById('productModal');
-    
-    // function to show and hide each section
-    function showSection(sectionToShow) {
-        itemsSection.classList.add('hidden');
-        productsSection.classList.add('hidden');
-        welcomeSection.classList.add('hidden');
-        sectionToShow.classList.remove('hidden');
-      }
-      
-      // click funtion when click items and product button on dashboard
-      itemsButtonDashboard.addEventListener('click', () => {
-        showSection(itemsSection);
-        fetchItems(); // Call fetch items when the button is clicked
-       });
+  // Check if the elements exist before attaching event listeners
+  if (productsButtonDashboard) {
+      productsButtonDashboard.addEventListener('click', () => {
+          showSection(productsSection);
+          fetchProducts();
+      });
+  }
 
-      itemsButton.addEventListener('click', () => {
-        showSection(itemsSection);
-        fetchItems();
-       });
-
-       productsButton.addEventListener('click', () => {
+  if (productsButton) {
+    productsButton.addEventListener('click', () => {
         showSection(productsSection);
         fetchProducts();
-       });
+    });
+}
 
-       productsButtonDashboard.addEventListener('click', () => {
-        showSection(productsSection);
-        fetchItems(); // Call fetch items when the button is clicked
-       });
 
-        // Initially show welcome section
-       showSection(welcomeSection);
+  if (suppliersButton) {
+      suppliersButton.addEventListener('click', () => {
+        console.log('Supplier button clicked');
+          showSection(suppliersSection);
+      });
+  }
+
+  if (ordersButton) {
+      ordersButton.addEventListener('click', () => {
+          showSection(ordersSection);
+      });
+  }
+
+  
+
+  // Ensure the section exists before using the showSection function
+  function showSection(sectionToShow) {
+      if (!sectionToShow) {
+          console.error("Section to show is null or undefined.");
+          return;
+      }
       
-      // function for open and close of each modal
-      function closeItemModal() { itemModal.classList.add('hidden'); }  
-      function closeProductModal() { productModal.classList.add('hidden'); }
+      // Hide all sections
+      productsSection?.classList.add('hidden');
+      suppliersSection?.classList.add('hidden');
+      ordersSection?.classList.add('hidden');
+      welcomeSection?.classList.add('hidden');
       
+      // Show the section passed to the function
+      sectionToShow.classList.remove('hidden');
+  }
 
-      // declaration of variable to the closeModal function
-      itemCancelButton.onclick = closeItemModal;
-      productCancelButton.onclick = closeProductModal;
+  // declaration of variable to the closeModal function
+  if (productCancelButton && productModal) {
+    productCancelButton.onclick = () => productModal.classList.add('hidden');
+  } 
+
+
+  // Add modal open functionality
     
-        // Add Item Button
-      const addItemButton = document.getElementById('addItemButton');
-      addItemButton.addEventListener('click', openAddItemModal);
-    
-      const addProductButton = document.getElementById('addProductButton');
-      addProductButton.addEventListener('click', openAddProductModal);
-    
-      //  it is connected from itemSection when click this button it fetchItems
-      itemsButton.addEventListener('click', fetchItems);
-      productsButton.addEventListener('click', fetchProducts);
-
-
-         // Trigger search on button click
-      const searchItemButton = document.getElementById('searchItemButton');
-      searchItemButton.addEventListener('click', searchItems);
-
-      
-         // Trigger search product on button click
-         const searchProductButton = document.getElementById('searchProductButton');
-         searchProductButton.addEventListener('click', searchProducts);
+  const addProductButton = document.getElementById('addProductButton');
+  addProductButton.addEventListener('click', openAddProductModal);
+  
       
     // Initialize default view
-    fetchItems();
+
     fetchProducts();
       
     fetch('http://localhost:8080/api/counts')
@@ -98,13 +93,11 @@ document.addEventListener('DOMContentLoaded', () => {
       return response.json();
     })
     .then(data => {
-      // Update the page with the fetched counts
-      document.getElementById('itemCount').textContent = data.itemCount;
+      // Update the page with the fetched counts   
       document.getElementById('productCount').textContent = data.productCount;
     })
     .catch(error => {
       console.error('Error fetching counts:', error);
-      document.getElementById('itemCount').textContent = 'Error';
       document.getElementById('productCount').textContent = 'Error';
     });
   

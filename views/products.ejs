@@ -41,11 +41,13 @@
         <table class="min-w-full bg-white">
             <thead>
                 <tr>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Code</th>
                     <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product Name</th>
-                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Since Created</th>
-                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Selling Price</th>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Purchase Price</th>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                    <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reoder Level</th>
                     <th class="py-2 px-6 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                 </tr>
             </thead>
@@ -58,41 +60,91 @@
         <button id="productNextPageButton" class="rounded  px-4 py-2 bg-gray-300">Next</button>
       </div>
       
-                <!-- Reusable Item Modal for Add and Edit -->
-            <div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
-                <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
-                <h2 id="productModalTitle" class="text-2xl font-bold mb-4">Add Product</h2>
-                <form id="productForm">
-                    <!-- Hidden input to store item ID when editing -->
-                    <input type="hidden" id="productId" name="productId">
-                    
-                    <div class="mb-4">
+         <!-- Reusable Item Modal for Add and Edit -->
+<div id="productModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
+        <h2 id="productModalTitle" class="text-2xl font-bold mb-4">Add Product</h2>
+        <form id="productForm">
+            <!-- Hidden input to store item ID when editing -->
+            <input type="hidden" id="hiddenProductId" name="hiddenProductId">
+            
+            <div class="grid grid-cols-1 gap-4 mb-4 sm:grid-cols-12">
+                <!-- Product Name -->
+                <div class="sm:col-span-5">
                     <label for="productName" class="block text-gray-700">Product Name</label>
                     <input type="text" id="productName" name="productName" class="w-full border border-gray-300 rounded px-4 py-2" required>
-                    </div>
-                    
-                    <div class="mb-4">
-                    <label for="price" class="block text-gray-700">Price</label>
-                    <input type="number" id="price" name="price" class="w-full border border-gray-300 rounded px-4 py-2" required>
-                    </div>
-            
-                    <!-- Category Dropdown -->
-                    <div class="mb-4 relative inline-block text-left">
-                    <label for="category" class="block text-gray-700">Status</label>
-                    <select id="product-category" name="category" class="w-full border border-gray-300 rounded px-4 py-2">
-                        <option value="electronics">Active</option>
-                        <option value="furniture">Inactive</option>
+                </div>
 
-                    </select>
-                    </div>
-            
-                    <div class="flex justify-end">
-                    <button type="button" id="productCancelButton" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
-                    <button type="submit" id="productSubmitButton" class="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
-                    </div>
-                </form>
+                <!-- Quantity in Stock -->
+                <div class="sm:col-span-4">
+                    <label for="quantityInStock" class="block text-gray-700">Quantity in Stock</label>
+                    <input type="number" id="quantityInStock" name="quantityInStock" class="w-full border border-gray-300 rounded px-4 py-2" required>
+                </div>
+
+                <!-- Product ID -->
+                <div class="sm:col-span-3">
+                    <label id="productIdName" for="productCode" class="block text-gray-700">Product Code</label>
+                    <input type="text" id="productCode" name="productCode" class="w-full border border-gray-300 rounded px-4 py-2" >
                 </div>
             </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <!-- Purchase Price -->
+                <div>
+                    <label for="price" class="block text-gray-700">Purchase Price</label>
+                    <input type="number" id="price" name="price" class="w-full border border-gray-300 rounded px-4 py-2" required>
+                </div>
+
+                <!-- Selling Price -->
+                <div>
+                    <label for="sellingPrice" class="block text-gray-700">Selling Price</label>
+                    <input type="number" id="sellingPrice" name="sellingPrice" class="w-full border border-gray-300 rounded px-4 py-2" required>
+                </div>
+
+                <!-- Reorder Level -->
+                <div>
+                    <label for="reorderLevel" class="block text-gray-700">Reorder Level</label>
+                    <input type="number" id="reorderLevel" name="reorderLevel" class="w-full border border-gray-300 rounded px-4 py-2" required>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <!-- Category Dropdown -->
+                <div>
+                    <label for="category" class="block text-gray-700">Category</label>
+                    <select id="category" name="category" class="w-full border border-gray-300 rounded px-4 py-2">
+                        <option value="electronics">Electronics</option>
+                        <option value="furniture">Furniture</option>
+                        <option value="clothing">Clothing</option>
+                        <!-- Add more categories as needed -->
+                    </select>
+                </div>
+
+                <!-- Secondary Category Dropdown -->
+                <div>
+                    <label for="secondaryCategory" class="block text-gray-700">Supplier</label>
+                    <select id="secondaryCategory" name="secondaryCategory" class="w-full border border-gray-300 rounded px-4 py-2">
+                        <option value="sub-category-1">Sub-category 1</option>
+                        <option value="sub-category-2">Sub-category 2</option>
+                        <!-- Add more sub-categories as needed -->
+                    </select>
+                </div>
+            </div>
+
+            <!-- Description Field -->
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700">Description</label>
+                <textarea id="description" name="description" class="w-full border border-gray-300 rounded px-4 py-2" rows="2"></textarea>
+            </div>
+
+            <div class="flex justify-end">
+                <button type="button" id="productCancelButton" class="bg-gray-500 text-white px-4 py-2 rounded mr-2">Cancel</button>
+                <button type="submit" id="productSubmitButton" class="bg-blue-500 text-white px-4 py-2 rounded">Add</button>
+            </div>
+        </form>
+    </div>
+</div>
+
   
     
 </div>

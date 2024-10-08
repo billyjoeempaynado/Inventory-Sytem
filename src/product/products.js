@@ -66,8 +66,10 @@ export function displayProducts(products) {
           const row = document.createElement('tr');
 
           row.innerHTML = `
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
               <td class="py-4 px-6 text-sm font-medium text-gray-900">${product.product_name}</td>
               <td class="py-4 px-6 text-sm text-gray-500">  &#8369; ${product.price}</td>
+              <td class="py-4 px-6 text-sm text-gray-500"></td>
               <td class="py-4 px-6 text-sm text-gray-500"></td>
               <td class="py-4 px-6 text-sm text-gray-500"></td>
               <td class="py-4 px-6 text-sm text-gray-500"></td>
@@ -173,9 +175,6 @@ export function openAddProductModal() {
   productForm.setAttribute('data-mode', 'add');  // Set form mode to 'add'
   console.log('Form mode set to:', productForm.getAttribute('data-mode'));  // Debugging log
 
-// Clear the hidden itemId input field since we're adding a new product
-  document.getElementById('productId').value = '';
-
   // Clear the input fields
   document.getElementById('productName').value = '';
   document.getElementById('price').value = '';
@@ -193,10 +192,17 @@ export function openAddProductModal() {
 export function openEditProductModal(productId, productName, price) {
   const productForm = document.getElementById('productForm');
   productForm.setAttribute('data-mode', 'edit');  // Set form mode to 'edit'
-  productForm.setAttribute('data-id', productId);    // Set the form's data-id to the itemId
+  productForm.setAttribute('data-id', productId);    // Set the form's data-id to the ProductID
 
-  // Set the hidden itemId input field
-  document.getElementById('productId').value = productId;
+  
+  document.getElementById('productIdName').classList.remove('hidden');
+ 
+  // Set the hidden productId input field
+  document.getElementById('hiddenProductId').value = productId;
+
+  // Populate the visible Product ID field and disable it
+  const productCodeField = document.getElementById('productCode');
+  productCodeField.disabled = true; // Disable the field to prevent editing
 
   // Populate the form fields with the item data
   document.getElementById('productName').value = productName;
@@ -216,7 +222,7 @@ export function closeProductModal() {
   document.getElementById('productModal').classList.add('hidden');
 }
 
-// Handling the form submission for items (both add and edit)
+// Handling the form submission for peoduct (both add and edit)
 document.getElementById('productForm').addEventListener('submit', function(event) {
   event.preventDefault();
   const productForm = event.target;

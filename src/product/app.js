@@ -1,4 +1,5 @@
 import { fetchProducts, openAddProductModal, searchProducts, openEditProductModal, deleteProduct } from './products.js';
+import { fetchSuppliers,openAddSupplierModal, searchSuppliers ,openEditSupplierModal, deleteSupplier } from './supplier.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,9 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
    // should button for cancel
   const productCancelButton = document.getElementById('productCancelButton');
+  const supplierCancelButton = document.getElementById('supplierCancelButton');
 
   // call for modal ID
   const productModal = document.getElementById('productModal');
+  const supplierModal = document.getElementById('supplierModal');
 
   // Check if the elements exist before attaching event listeners
   if (productsButtonDashboard) {
@@ -39,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (suppliersButton) {
       suppliersButton.addEventListener('click', () => {
           showSection(suppliersSection);
+          fetchSuppliers();
       });
   }
 
@@ -72,11 +76,18 @@ document.addEventListener('DOMContentLoaded', () => {
     productCancelButton.onclick = () => productModal.classList.add('hidden');
   } 
 
+  if (supplierCancelButton && supplierModal) {
+    supplierCancelButton.onclick = () => supplierModal.classList.add('hidden');
+  } 
+
 
   // Add modal open functionality
     
   const addProductButton = document.getElementById('addProductButton');
   addProductButton.addEventListener('click', openAddProductModal);
+
+  const addSupplierButton = document.getElementById('addSupplierButton');
+  addSupplierButton.addEventListener('click', openAddSupplierModal);
   
       
     // Initialize default view

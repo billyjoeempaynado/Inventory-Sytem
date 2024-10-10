@@ -10,6 +10,7 @@ const cors = require("cors");
 
 
 const userRoutes = require("./src/product/userRoutes");
+const supplierRoutes = require("./src/product/supplierRoutes");
 const productRoutes = require("./src/product/productRoutes");
 
 const initializePassport = require("./passportConfig");
@@ -43,11 +44,12 @@ app.use(flash());
 // Routes
 
 app.use("/api/inventory/products", productRoutes);
+app.use("/api/inventory/suppliers", supplierRoutes);
 app.use("/api/v1/users", userRoutes);
 
 
 app.get("/", (req, res) => {
-    res.render("login");
+    res.render("dashboard");
 });
 
 
@@ -66,10 +68,6 @@ app.get('/products', (req, res) => {
     res.render('products'); // Renders product.ejs
 });
 
-
-app.get('/', (req, res) => {
-    res.render('index'); // Renders items.ejs
-});
 
 app.get("/users/register", checkAuthenticated, (req, res) => {
     res.render("register");
@@ -144,25 +142,30 @@ app.post("/users/login", passport.authenticate("local", {
 // API endpoint to get item and product counts
 app.get('/api/counts', async (req, res) => {
     try {
-      const itemCountQuery = 'SELECT COUNT(*) AS item_count FROM items';
-      const productCountQuery = 'SELECT COUNT(*) AS product_count FROM products';
+      const productCountQuery = 'SELECT COUNT(*) AS product_count FROM Products';
   
-      const itemCountResult = await pool.query(itemCountQuery);
+
       const productCountResult = await pool.query(productCountQuery);
-  
-      const itemCount = itemCountResult.rows[0].item_count;
+    
       const productCount = productCountResult.rows[0].product_count;
   
-      res.json({ itemCount, productCount });
+      res.json({productCount });
     } catch (err) {
       console.error('Error occurred while fetching counts:', err);
       res.status(500).json({ error: 'Error retrieving counts', details: err.message });
     }
   });
-  
-  
 
-
+ app.get('/suppliers', async (req, res) => {
+    try {
+        const result = await db.query('SELECT supplier_id, supplier_name FROM suppliers');
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error fetching suppliers:', error);
+        res.status(500).send('Server error');
+    }
+});
+  
 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {

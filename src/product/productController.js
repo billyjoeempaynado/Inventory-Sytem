@@ -11,8 +11,8 @@ const getProducts = (req, res) => {
 };
 
 const getProductById = (req, res) => {
-  const id = parseInt(req.params.id);
-  pool.query(queries.getProductById, [id], (error, results) => {
+  const product_id = parseInt(req.params.product_id);
+  pool.query(queries.getProductById, [product_id], (error, results) => {
     if (error) {
       return res.status(500).json({ error: "Failed to retrieve product" });
     }
@@ -21,15 +21,15 @@ const getProductById = (req, res) => {
 };
 
 const addProduct = (req, res) => {
-  const { product_name, price } = req.body;
+  const { product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level } = req.body;
 
   console.log("Request Body:", req.body); // Log the entire request body
 
-  if (!product_name || !price) {
+  if (!product_name || !purchase_price) {
     return res.status(400).json({ error: "Product name and price are required" });
   }
 
-  pool.query(queries.addProduct, [product_name, price], (error, results) => {
+  pool.query(queries.addProduct, [product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level], (error, results) => {
     if (error) {
       return res.status(500).json({ error: "Failed to add product" });
     }
@@ -38,9 +38,9 @@ const addProduct = (req, res) => {
 };
 
 const deleteProduct = (req, res) => {
-  const id = parseInt(req.params.id);
+  const product_id = parseInt(req.params.product_id);
 
-  pool.query(queries.getProductById, [id], (error, results) => {
+  pool.query(queries.getProductById, [product_id], (error, results) => {
     if (error) {
       return res.status(500).json({ error: "Failed to delete product" });
     }
@@ -50,7 +50,7 @@ const deleteProduct = (req, res) => {
       return res.status(404).send("Product does not exist in the database");
     }
 
-    pool.query(queries.deleteProduct, [id], (error, results) => {
+    pool.query(queries.deleteProduct, [product_id], (error, results) => {
       if (error) {
         return res.status(500).json({ error: "Failed to remove product" });
       }
@@ -60,10 +60,10 @@ const deleteProduct = (req, res) => {
 };
 
 const updateProduct = (req, res) => {
-  const id = parseInt(req.params.id);
-  const { product_name, price } = req.body;
+  const product_id = parseInt(req.params.product_id);
+  const { product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level } = req.body;
 
-  pool.query(queries.getProductById, [id], (error, results) => {
+  pool.query(queries.getProductById, [product_id], (error, results) => {
     if (error) {
       return res.status(500).json({ error: "Failed to update product" });
     }
@@ -73,7 +73,7 @@ const updateProduct = (req, res) => {
       return res.status(404).send("Product does not exist in the database");
     }
 
-    pool.query(queries.updateProduct, [product_name, price, id], (error, results) => {
+    pool.query(queries.updateProduct, [product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level, product_id], (error, results) => {
       if (error) {
         return res.status(500).json({ error: "Failed to update product" });
       }

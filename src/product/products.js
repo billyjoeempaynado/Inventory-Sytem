@@ -2,6 +2,26 @@
 let currentPage = 1;
 const productsPerPage = 6;
 
+// Fetch suppliers and populate dropdown
+function fetchSuppliers() {
+  fetch('http://localhost:8080/api/inventory/suppliers/suppliers')
+      .then(response => response.json())
+      .then(suppliers => {
+          const supplierDropdown = document.getElementById('supplierDropdown');
+          supplierDropdown.innerHTML = '<option value="">Select a supplier</option>'; // Reset dropdown
+
+          suppliers.forEach(supplier => {
+              const option = document.createElement('option');
+              option.value = supplier.supplier_id;  // supplier_id from your database
+              option.textContent = supplier.supplier_name;  // Display supplier name
+              supplierDropdown.appendChild(option);
+          });
+      })
+      .catch(error => {
+          console.error('Error fetching suppliers:', error);
+      });
+}
+
 // Fetch and display products
 export function fetchProducts() {
     fetch('http://localhost:8080/api/inventory/products/products')
@@ -29,7 +49,7 @@ function debounce(func, delay) {
   };
 }
 
-document.getElementById('searchProductInput').addEventListener('input', searchProducts);
+
 
 export function searchProducts() {
   const searchQuery = document.getElementById('searchProductInput').value.trim().toLowerCase();
@@ -37,11 +57,11 @@ export function searchProducts() {
 
   const filteredProducts = products.filter(item => 
       item.product_name.toLowerCase().includes(searchQuery) ||
-      String(item.price).toLowerCase().includes(searchQuery)  // Convert price to string
+      String(item.purchas_price).toLowerCase().includes(searchQuery)  // Convert price to string
   );
 
   // Reset pagination to page 1 when searching
-  currentPage = 1;
+  currentPage = 1; 
 
   // Display filtered items (make sure it handles pagination)
   displayProducts(filteredProducts);
@@ -67,17 +87,17 @@ export function displayProducts(products) {
 
           row.innerHTML = `
               <td class="py-4 px-6 text-sm text-gray-500"></td>
-              <td class="py-4 px-6 text-sm font-medium text-gray-900">${product.product_name}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">  &#8369; ${product.price}</td>
+              <td class="py-4 px-6 text-sm text-gray-900">${product.product_name}</td>
+              <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.selling_price}  </td>
+              <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.purchase_price}</td>
               <td class="py-4 px-6 text-sm text-gray-500"></td>
-              <td class="py-4 px-6 text-sm text-gray-500"></td>
-              <td class="py-4 px-6 text-sm text-gray-500"></td>
-              <td class="py-4 px-6 text-sm text-gray-500"></td>
+              <td class="py-4 px-6 text-sm text-gray-500">${product.supplier_id}</td>
+              <td class="py-4 px-6 text-sm text-gray-500"> ${product.reorder_level}</td>
               <td class="sm:flex py-4 px-6 text-sm">
-                  <button data-id="${product.id}" class="edit-product-btn p-2 text-gray-700 hover:text-gray-500">
+                  <button data-id="${product.product_id}" class="edit-product-btn p-2 text-gray-700 hover:text-gray-500">
                       <i class="fa-solid fa-pen-to-square"></i>
                   </button>
-                  <button data-id="${product.id}" class="delete-product-btn p-2 text-red-700 hover:text-red-500">
+                  <button data-id="${product.product_id}" class="delete-product-btn p-2 text-red-700 hover:text-red-500">
                       <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
                   </button>
               </td>
@@ -153,10 +173,10 @@ function attachProductEventListeners() {
       button.addEventListener('click', (event) => {
           const productId = event.currentTarget.getAttribute('data-id');
           const products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
-          const productToEdit = products.find(product=> product.id === Number(productId));
+          const productToEdit = products.find(product=> product.product_id === Number(productId));
           if (productToEdit) {
               // Open the modal and populate fields with the existing product data
-              openEditProductModal(productId, productToEdit.product_name, productToEdit.price);
+              openEditProductModal(productId, productToEdit.product_name, productToEdit.purchase_price, productToEdit.selling_price, productToEdit.order_level, productToEdit.supplier_id);
           } else {
               console.error('Product not found:', productId);
           }
@@ -178,27 +198,31 @@ export function openAddProductModal() {
   // Clear the input fields
   document.getElementById('productName').value = '';
   document.getElementById('price').value = '';
+  document.getElementById('sellingPrice').value = '';
+  document.getElementById('reorderLevel').value = '';
 
   // Update modal title and button text for "Add"
   document.getElementById('productModalTitle').innerText = 'Add product';
   document.getElementById('productSubmitButton').innerText = 'Add';
 
+  const productCodeField = document.getElementById('productCode');
+  productCodeField.disabled = false; // Disable the field to prevent editing
+
+
   // Open the modal (assuming you have some modal logic)
   document.getElementById('productModal').classList.remove('hidden');
+
+  fetchSuppliers();
 }
 
 
 // Function to open the Item Modal (for both Add and Edit)
-export function openEditProductModal(productId, productName, price) {
+export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel) {
   const productForm = document.getElementById('productForm');
   productForm.setAttribute('data-mode', 'edit');  // Set form mode to 'edit'
   productForm.setAttribute('data-id', productId);    // Set the form's data-id to the ProductID
 
-  
-  document.getElementById('productIdName').classList.remove('hidden');
- 
-  // Set the hidden productId input field
-  document.getElementById('hiddenProductId').value = productId;
+
 
   // Populate the visible Product ID field and disable it
   const productCodeField = document.getElementById('productCode');
@@ -207,6 +231,9 @@ export function openEditProductModal(productId, productName, price) {
   // Populate the form fields with the item data
   document.getElementById('productName').value = productName;
   document.getElementById('price').value = price;
+  document.getElementById('sellingPrice').value = sellingPrice;
+  document.getElementById('reorderLevel').value = reorderLevel;
+  document.getElementById('supplierDropdown').value = supplierId;
 
   // Update modal title and button text for "Edit"
   document.getElementById('productModalTitle').innerText = 'Edit Product';
@@ -214,6 +241,8 @@ export function openEditProductModal(productId, productName, price) {
 
   // Open the modal
   document.getElementById('productModal').classList.remove('hidden');
+
+  fetchSuppliers();
 }
 
 // Function to close the Item Modal
@@ -229,22 +258,41 @@ document.getElementById('productForm').addEventListener('submit', function(event
   const mode = productForm.getAttribute('data-mode'); // Either 'add' or 'edit'
   const productName = document.getElementById('productName').value.trim();
   const price = document.getElementById('price').value.trim();
+  const sellingPrice = document.getElementById('sellingPrice').value.trim();
+  const reorderLevel = document.getElementById('reorderLevel').value.trim();
+  const supplierId = document.getElementById('supplierDropdown').value.trim();
+  
 
 
   const productNameField = document.getElementById('productName');
   const priceField = document.getElementById('price');
-
-if (productNameField && priceField) {
-  const productName = productNameField.value.trim();
-  const price = priceField.value.trim();
-
-  // Proceed with the rest of the code using productName and stockNumber
-} else {
-  console.error('Form elements not found: productName or price');
-}
+  const sellingPriceField = document.getElementById('sellingPrice');
+  const reorderLevelField = document.getElementById('reorderLevel');
+  
 
 
-  console.log('Form Data:', { productName, price }); // Log the form data
+  if (productNameField && priceField && sellingPriceField && reorderLevelField) {
+    const productName = productNameField.value.trim();
+    const price = priceField.value.trim();
+    const sellingPrice = sellingPriceField.value.trim();
+    const reorderLevel = reorderLevelField.value.trim();
+    
+
+
+
+    if (!productName || !price || !sellingPrice || !reorderLevel ) {
+      showAlertMessage('All fields (Product Name, Purchase Price, Selling Price, and Reorder Level) are required.', 'error');
+      return;
+  }
+  
+    // Proceed with the rest of the code using productName, price, and sellingPrice
+  } else {
+    console.error('Form elements not found: productName, price, or sellingPrice');
+  }
+  
+
+
+  console.log('Form Data:', { productName, price, sellingPrice, reorderLevel, supplierId }); // Log the form data
 
   if (mode === 'add') {
     // Add a new item
@@ -252,7 +300,10 @@ if (productNameField && priceField) {
       method: 'POST',
       body: JSON.stringify({ 
         product_name: productName.trim(),
-        price: price.trim()
+        purchase_price: price.trim(),
+        selling_price: sellingPrice.trim(),
+        reorder_level: reorderLevel.trim(),
+        supplier_id: supplierId.trim()
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -281,7 +332,9 @@ if (productNameField && priceField) {
       method: 'PUT',
       body: JSON.stringify({ 
         product_name: productName,  // changed to product_name
-        price: price // changed to price
+        purchase_price: price, // changed to price
+        selling_price: sellingPrice,
+        reorder_level: reorderLevel 
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -305,36 +358,6 @@ if (productNameField && priceField) {
   }
 
   closeProductModal(); // Close the modal after submitting
-});
-
-
-
-  // Function to show alert messages
-function showAlertMessage(message, type) {
-  if (type === 'success') {
-    alertify.success(message);  // Success alert
-} else if (type === 'error') {
-    alertify.error(message);  // Error alert
-} else if (type === 'warning') {
-    alertify.warning(message);  // Warning alert
-} else if (type === 'danger') {
-    alertify.error(message);  // Using error for danger in Alertify
-} else if (type === 'message') {
-    alertify.message(message);  // General message alert
-}
-}
-
-// Initialize alert message existence
-document.addEventListener("DOMContentLoaded", function () {
-  const alertMessage = document.getElementById("alertMessage");
-  if (!alertMessage) {
-      console.error("Alert message element not found.");
-  }
-});
-
-// Function to close the alert manually
-document.getElementById("closeProductAlert").addEventListener("click", function() {
-  document.getElementById("alertMessage").classList.add("hidden");
 });
 
 export function deleteProduct(event) {
@@ -361,8 +384,8 @@ export function deleteProduct(event) {
           showAlertMessage('Product deleted successfully!', 'danger'); // Red for delete
 
           // Remove the item from localStorage
-          let savedProducts = JSON.parse(localStorage.getItem('inventoryProduct')) || [];
-          savedProducts = savedProducts.filter(product => product.id !== Number(itemId));
+          let savedProducts = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
+          savedProducts = savedProducts.filter(product => product.product_id !== Number(productId));
           localStorage.setItem('inventoryProducts', JSON.stringify(savedProducts));
 
           // Refresh the product list after deletion
@@ -374,6 +397,26 @@ export function deleteProduct(event) {
       alertify.error('Delete action canceled.');
   });
 }
+
+
+
+  // Function to show alert messages
+function showAlertMessage(message, type) {
+  if (type === 'success') {
+    alertify.success(message);  // Success alert
+} else if (type === 'error') {
+    alertify.error(message);  // Error alert
+} else if (type === 'warning') {
+    alertify.warning(message);  // Warning alert
+} else if (type === 'danger') {
+    alertify.error(message);  // Using error for danger in Alertify
+} else if (type === 'message') {
+    alertify.message(message);  // General message alert
+}
+}
+
+
+
 
 
 alertify.set('notifier', 'position', 'top-right');  // Set position of notifications

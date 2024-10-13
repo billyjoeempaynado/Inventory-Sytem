@@ -2,25 +2,32 @@
 let currentPage = 1;
 const productsPerPage = 6;
 
-// Fetch suppliers and populate dropdown
-function fetchSuppliers() {
-  fetch('http://localhost:8080/api/inventory/suppliers/suppliers')
-      .then(response => response.json())
-      .then(suppliers => {
-          const supplierDropdown = document.getElementById('supplierDropdown');
-          supplierDropdown.innerHTML = '<option value="">Select a supplier</option>'; // Reset dropdown
 
-          suppliers.forEach(supplier => {
-              const option = document.createElement('option');
-              option.value = supplier.supplier_id;  // supplier_id from your database
-              option.textContent = supplier.supplier_name;  // Display supplier name
-              supplierDropdown.appendChild(option);
-          });
-      })
-      .catch(error => {
-          console.error('Error fetching suppliers:', error);
+// fetch the supplier name to dropdown
+function fetchAndPopulateSuppliers() {
+  const supplierDropdown = document.getElementById('supplierDropdown');
+  // console.log('Dropdown Element:', supplierDropdown); // Check if the element is found
+  if (!supplierDropdown) {
+    console.error('supplierDropdown is undefined or null');
+    return;
+  }
+
+  // Proceed with fetching suppliers if the element exists
+  fetch('http://localhost:8080/api/inventory/suppliers/suppliers')
+    .then(response => response.json())
+    .then(suppliers => {
+      supplierDropdown.innerHTML = '<option value="">Select a supplier</option>'; // Reset dropdown options
+      suppliers.forEach(supplier => {
+        const option = document.createElement('option');
+        option.value = supplier.supplier_id; // Assuming supplier_id is the ID in your suppliers table
+        option.text = supplier.supplier_name; // Assuming supplier_name is the name in your suppliers table
+        supplierDropdown.appendChild(option);
       });
+    })
+    .catch(error => console.error('Error fetching suppliers:', error));
 }
+
+
 
 // Fetch and display products
 export function fetchProducts() {
@@ -37,6 +44,7 @@ export function fetchProducts() {
         })
         .catch(error => console.error('Error fetching products:', error));
 }
+
 
 function debounce(func, delay) {
   let timer;
@@ -57,7 +65,7 @@ export function searchProducts() {
 
   const filteredProducts = products.filter(item => 
       item.product_name.toLowerCase().includes(searchQuery) ||
-      String(item.purchas_price).toLowerCase().includes(searchQuery)  // Convert price to string
+      String(item.purchase_price).toLowerCase().includes(searchQuery)  // Convert price to string
   );
 
   // Reset pagination to page 1 when searching
@@ -79,7 +87,7 @@ export function displayProducts(products) {
   tableBody.innerHTML = ''; // Clear existing rows
 
   if (paginatedProducts.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="3" class="text-center">No product found.</td></tr>';
+      tableBody.innerHTML = '<tr><td colspan="3" class="mt-4 text-center">No product found.</td></tr>';
   } else {
       paginatedProducts.forEach(product => {
         
@@ -91,7 +99,7 @@ export function displayProducts(products) {
               <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.selling_price}  </td>
               <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.purchase_price}</td>
               <td class="py-4 px-6 text-sm text-gray-500"></td>
-              <td class="py-4 px-6 text-sm text-gray-500">${product.supplier_id}</td>
+              <td class="py-4 px-6 text-sm text-gray-500">${product.supplier_name || 'No Supplier Assigned'}</td>
               <td class="py-4 px-6 text-sm text-gray-500"> ${product.reorder_level}</td>
               <td class="sm:flex py-4 px-6 text-sm">
                   <button data-id="${product.product_id}" class="edit-product-btn p-2 text-gray-700 hover:text-gray-500">
@@ -103,8 +111,12 @@ export function displayProducts(products) {
               </td>
           `;
           tableBody.appendChild(row);
+          // console.log(`Product: ${product.product_name}`);
+          // console.log(`Supplier: ${product.supplier_name ? product.supplier_name : 'No Supplier Assigned'}`);
       });
 
+      console.log('Products to display:', products);
+      
       // Attach event listeners after adding rows
       attachProductEventListeners();
   }
@@ -200,6 +212,7 @@ export function openAddProductModal() {
   document.getElementById('price').value = '';
   document.getElementById('sellingPrice').value = '';
   document.getElementById('reorderLevel').value = '';
+  
 
   // Update modal title and button text for "Add"
   document.getElementById('productModalTitle').innerText = 'Add product';
@@ -212,12 +225,12 @@ export function openAddProductModal() {
   // Open the modal (assuming you have some modal logic)
   document.getElementById('productModal').classList.remove('hidden');
 
-  fetchSuppliers();
+  fetchAndPopulateSuppliers();
 }
 
 
 // Function to open the Item Modal (for both Add and Edit)
-export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel) {
+export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel, product) {
   const productForm = document.getElementById('productForm');
   productForm.setAttribute('data-mode', 'edit');  // Set form mode to 'edit'
   productForm.setAttribute('data-id', productId);    // Set the form's data-id to the ProductID
@@ -233,7 +246,8 @@ export function openEditProductModal(productId, productName, price, sellingPrice
   document.getElementById('price').value = price;
   document.getElementById('sellingPrice').value = sellingPrice;
   document.getElementById('reorderLevel').value = reorderLevel;
-  document.getElementById('supplierDropdown').value = supplierId;
+  document.getElementById('supplierDropdown').value = product.supplierId; // Set selected supplier
+ 
 
   // Update modal title and button text for "Edit"
   document.getElementById('productModalTitle').innerText = 'Edit Product';
@@ -242,7 +256,7 @@ export function openEditProductModal(productId, productName, price, sellingPrice
   // Open the modal
   document.getElementById('productModal').classList.remove('hidden');
 
-  fetchSuppliers();
+  
 }
 
 // Function to close the Item Modal
@@ -260,36 +274,7 @@ document.getElementById('productForm').addEventListener('submit', function(event
   const price = document.getElementById('price').value.trim();
   const sellingPrice = document.getElementById('sellingPrice').value.trim();
   const reorderLevel = document.getElementById('reorderLevel').value.trim();
-  const supplierId = document.getElementById('supplierDropdown').value.trim();
-  
-
-
-  const productNameField = document.getElementById('productName');
-  const priceField = document.getElementById('price');
-  const sellingPriceField = document.getElementById('sellingPrice');
-  const reorderLevelField = document.getElementById('reorderLevel');
-  
-
-
-  if (productNameField && priceField && sellingPriceField && reorderLevelField) {
-    const productName = productNameField.value.trim();
-    const price = priceField.value.trim();
-    const sellingPrice = sellingPriceField.value.trim();
-    const reorderLevel = reorderLevelField.value.trim();
-    
-
-
-
-    if (!productName || !price || !sellingPrice || !reorderLevel ) {
-      showAlertMessage('All fields (Product Name, Purchase Price, Selling Price, and Reorder Level) are required.', 'error');
-      return;
-  }
-  
-    // Proceed with the rest of the code using productName, price, and sellingPrice
-  } else {
-    console.error('Form elements not found: productName, price, or sellingPrice');
-  }
-  
+  const supplierId = document.getElementById('supplierDropdown').value;  // Capture supplier ID
 
 
   console.log('Form Data:', { productName, price, sellingPrice, reorderLevel, supplierId }); // Log the form data
@@ -303,7 +288,8 @@ document.getElementById('productForm').addEventListener('submit', function(event
         purchase_price: price.trim(),
         selling_price: sellingPrice.trim(),
         reorder_level: reorderLevel.trim(),
-        supplier_id: supplierId.trim()
+        supplier_id: supplierId
+        
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -334,7 +320,8 @@ document.getElementById('productForm').addEventListener('submit', function(event
         product_name: productName,  // changed to product_name
         purchase_price: price, // changed to price
         selling_price: sellingPrice,
-        reorder_level: reorderLevel 
+        reorder_level: reorderLevel, 
+        supplier_id: supplierId
       }),
       headers: {
         'Content-Type': 'application/json'

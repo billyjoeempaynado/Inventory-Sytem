@@ -156,16 +156,8 @@ app.get('/api/counts', async (req, res) => {
     }
   });
 
- app.get('/suppliers', async (req, res) => {
-    try {
-        const result = await db.query('SELECT supplier_id, supplier_name FROM suppliers');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching suppliers:', error);
-        res.status(500).send('Server error');
-    }
-});
-  
+
+
 
 function checkAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {

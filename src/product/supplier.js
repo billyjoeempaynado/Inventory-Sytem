@@ -225,29 +225,6 @@ document.getElementById('supplierForm').addEventListener('submit', function(even
   const supplierAddress = document.getElementById('supplierAddress').value.trim();
 
 
-  const supplierNameField = document.getElementById('supplierName');
-  const contactPersonField = document.getElementById('contactPerson');
-  const phoneNumberField = document.getElementById('phoneNumber');
-  const supplierEmailField = document.getElementById('supplierEmail');
-  const supplierAddressField = document.getElementById('supplierAddress');
-
-  if (supplierNameField && contactPersonField && phoneNumberField && supplierEmailField && supplierAddressField) {
-    const supplierName = supplierNameField.value.trim();
-    const contactPerson = contactPersonField.value.trim();
-    const phoneNumber = phoneNumberField.value.trim();
-    const supplierEmail = supplierEmailField.value.trim();
-    const supplierAddress = supplierAddressField.value.trim();
-  
-    if (!supplierName || !contactPerson || !phoneNumber || !supplierEmail || !supplierAddress) {
-      console.error('All fields (supplier name, contact person, phone number, email address) are required.');
-      return;
-    }
-  
-    // Proceed with the rest of the code using supplier name
-  } else {
-    console.error('Form elements not found: supplierName');
-  }
-
   console.log('Form Data:', { supplierName, contactPerson ,phoneNumber, supplierEmail, supplierAddress}); // Log the form data
 
   if (mode === 'add') {

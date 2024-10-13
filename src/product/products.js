@@ -29,6 +29,7 @@ function fetchAndPopulateSuppliers() {
 
 
 
+
 // Fetch and display products
 export function fetchProducts() {
     fetch('http://localhost:8080/api/inventory/products/products')
@@ -114,8 +115,6 @@ export function displayProducts(products) {
           // console.log(`Product: ${product.product_name}`);
           // console.log(`Supplier: ${product.supplier_name ? product.supplier_name : 'No Supplier Assigned'}`);
       });
-
-      console.log('Products to display:', products);
       
       // Attach event listeners after adding rows
       attachProductEventListeners();
@@ -182,17 +181,24 @@ function setupPaginationControls(totalPages, fetchProductsCallback) {
 function attachProductEventListeners() {
   // Edit Buttons
   document.querySelectorAll('.edit-product-btn').forEach(button => {
-      button.addEventListener('click', (event) => {
-          const productId = event.currentTarget.getAttribute('data-id');
-          const products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
-          const productToEdit = products.find(product=> product.product_id === Number(productId));
-          if (productToEdit) {
-              // Open the modal and populate fields with the existing product data
-              openEditProductModal(productId, productToEdit.product_name, productToEdit.purchase_price, productToEdit.selling_price, productToEdit.order_level, productToEdit.supplier_id);
-          } else {
-              console.error('Product not found:', productId);
-          }
-      });
+    button.addEventListener('click', (event) => {
+      const productId = event.currentTarget.getAttribute('data-id');
+      const products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
+      const productToEdit = products.find(product => product.product_id === Number(productId));
+  
+      if (productToEdit) {
+          openEditProductModal(
+            productId,
+            productToEdit.product_name,
+            productToEdit.purchase_price,
+            productToEdit.selling_price,
+            productToEdit.reorder_level,
+            productToEdit.supplier_id // Pass the supplier ID here
+          );
+      } else {
+          console.error('Product not found:', productId);
+      }
+  });
   });
 
     // Delete Buttons
@@ -230,12 +236,10 @@ export function openAddProductModal() {
 
 
 // Function to open the Item Modal (for both Add and Edit)
-export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel, product) {
+export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel) {
   const productForm = document.getElementById('productForm');
   productForm.setAttribute('data-mode', 'edit');  // Set form mode to 'edit'
-  productForm.setAttribute('data-id', productId);    // Set the form's data-id to the ProductID
-
-
+  productForm.setAttribute('data-id', productId); // Set the form's data-id to the productId
 
   // Populate the visible Product ID field and disable it
   const productCodeField = document.getElementById('productCode');
@@ -246,8 +250,6 @@ export function openEditProductModal(productId, productName, price, sellingPrice
   document.getElementById('price').value = price;
   document.getElementById('sellingPrice').value = sellingPrice;
   document.getElementById('reorderLevel').value = reorderLevel;
-  document.getElementById('supplierDropdown').value = product.supplierId; // Set selected supplier
- 
 
   // Update modal title and button text for "Edit"
   document.getElementById('productModalTitle').innerText = 'Edit Product';
@@ -256,8 +258,12 @@ export function openEditProductModal(productId, productName, price, sellingPrice
   // Open the modal
   document.getElementById('productModal').classList.remove('hidden');
 
-  
+  // Fetch suppliers and populate the dropdown (if not already populated)
+  fetchAndPopulateSuppliers();
 }
+
+
+
 
 // Function to close the Item Modal
 export function closeProductModal() {
@@ -276,8 +282,6 @@ document.getElementById('productForm').addEventListener('submit', function(event
   const reorderLevel = document.getElementById('reorderLevel').value.trim();
   const supplierId = document.getElementById('supplierDropdown').value;  // Capture supplier ID
 
-
-  console.log('Form Data:', { productName, price, sellingPrice, reorderLevel, supplierId }); // Log the form data
 
   if (mode === 'add') {
     // Add a new item

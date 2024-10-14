@@ -2,7 +2,6 @@ const express = require("express");
 const supplierRouter = express.Router(); // Correctly use express.Router()
 const controller = require("./supplierController");
 
-const router = express.Router();
 
 supplierRouter.get("/suppliers/", controller.getSuppliers);
 supplierRouter.post("/suppliers/", controller.addSupplier);

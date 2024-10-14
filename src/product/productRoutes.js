@@ -2,7 +2,6 @@ const express = require("express");
 const productRouter = express.Router(); // Correctly use express.Router()
 const controller = require("./productController"); 
 
-const router = express.Router();
 
 productRouter.get("/products/", controller.getProducts);
 productRouter.post("/products/", controller.addProduct);

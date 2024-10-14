@@ -1,8 +1,23 @@
 
 const getProducts = `
-SELECT p.product_id, p.product_name, p.description, p.category_id, s.supplier_name, p.purchase_price, p.selling_price, p.quantity_instock, p.reorder_level
-FROM products p
-JOIN suppliers s ON p.supplier_id = s.supplier_id;
+SELECT 
+    p.product_id, 
+    p.product_name, 
+    p.description, 
+    p.category_id, 
+    c.category_name, 
+    s.supplier_name, 
+    p.purchase_price, 
+    p.selling_price, 
+    p.quantity_instock, 
+    p.reorder_level
+FROM 
+    products p
+JOIN 
+    suppliers s ON p.supplier_id = s.supplier_id
+JOIN 
+    categories c ON p.category_id = c.category_id; 
+
 `;
 const getProductById = "SELECT * FROM products WHERE product_id = $1";
 const addProduct = "INSERT INTO products (product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)";

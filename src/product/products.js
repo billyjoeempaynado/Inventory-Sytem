@@ -28,6 +28,30 @@ function fetchAndPopulateSuppliers() {
 }
 
 
+function fetchAndPopulateCategories() {
+  const categoryDropdown = document.getElementById('categoryDropdown');
+  // console.log('Dropdown Element:', supplierDropdown); // Check if the element is found
+  if (!categoryDropdown) {
+    console.error('categoryDropdown is undefined or null');
+    return;
+  }
+
+  // Proceed with fetching suppliers if the element exists
+  fetch('http://localhost:8080/api/inventory/categories')
+    .then(response => response.json())
+    .then(categpries => {
+      categoryDropdown.innerHTML = '<option value="">Select a category</option>'; // Reset dropdown options
+      categpries.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category.category_id; // Assuming supplier_id is the ID in your suppliers table
+        option.text = category.category_name; // Assuming supplier_name is the name in your suppliers table
+        categoryDropdown.appendChild(option);
+      });
+    })
+    .catch(error => console.error('Error fetching suppliers:', error));
+}
+
+
 
 
 // Fetch and display products
@@ -99,7 +123,7 @@ export function displayProducts(products) {
               <td class="py-4 px-6 text-sm text-gray-900">${product.product_name}</td>
               <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.selling_price}  </td>
               <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.purchase_price}</td>
-              <td class="py-4 px-6 text-sm text-gray-500"></td>
+              <td class="py-4 px-6 text-sm text-gray-500">${product.category_name}</td>
               <td class="py-4 px-6 text-sm text-gray-500">${product.supplier_name || 'No Supplier Assigned'}</td>
               <td class="py-4 px-6 text-sm text-gray-500"> ${product.reorder_level}</td>
               <td class="sm:flex py-4 px-6 text-sm">
@@ -232,6 +256,7 @@ export function openAddProductModal() {
   document.getElementById('productModal').classList.remove('hidden');
 
   fetchAndPopulateSuppliers();
+  fetchAndPopulateCategories();
 }
 
 
@@ -281,6 +306,7 @@ document.getElementById('productForm').addEventListener('submit', function(event
   const sellingPrice = document.getElementById('sellingPrice').value.trim();
   const reorderLevel = document.getElementById('reorderLevel').value.trim();
   const supplierId = document.getElementById('supplierDropdown').value;  // Capture supplier ID
+  const categoryId = document.getElementById('categoryDropdown').value;
 
 
   if (mode === 'add') {
@@ -292,7 +318,8 @@ document.getElementById('productForm').addEventListener('submit', function(event
         purchase_price: price.trim(),
         selling_price: sellingPrice.trim(),
         reorder_level: reorderLevel.trim(),
-        supplier_id: supplierId
+        supplier_id: supplierId,
+        category_id: categoryId
         
       }),
       headers: {
@@ -325,7 +352,8 @@ document.getElementById('productForm').addEventListener('submit', function(event
         purchase_price: price, // changed to price
         selling_price: sellingPrice,
         reorder_level: reorderLevel, 
-        supplier_id: supplierId
+        supplier_id: supplierId,
+        category_id: categoryId
       }),
       headers: {
         'Content-Type': 'application/json'

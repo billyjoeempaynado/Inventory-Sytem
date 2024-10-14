@@ -12,6 +12,7 @@ const cors = require("cors");
 const userRoutes = require("./src/product/userRoutes");
 const supplierRoutes = require("./src/product/supplierRoutes");
 const productRoutes = require("./src/product/productRoutes");
+const categoriesRoutes = require("./src/product/categoriesRoutes");
 
 const initializePassport = require("./passportConfig");
 initializePassport(passport);
@@ -19,7 +20,6 @@ initializePassport(passport);
 
 const app = express();
 const port = process.env.PORT || 8080;
-
 
 
 app.set("view engine", "ejs");
@@ -45,6 +45,7 @@ app.use(flash());
 
 app.use("/api/inventory/products", productRoutes);
 app.use("/api/inventory/suppliers", supplierRoutes);
+app.use("/api/inventory/categories", categoriesRoutes);
 app.use("/api/v1/users", userRoutes);
 
 

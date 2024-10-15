@@ -13,6 +13,7 @@ const userRoutes = require("./src/product/userRoutes");
 const supplierRoutes = require("./src/product/supplierRoutes");
 const productRoutes = require("./src/product/productRoutes");
 const categoriesRoutes = require("./src/product/categoriesRoutes");
+const orderRoutes = require("./src/product/orderRoutes");
 
 const initializePassport = require("./passportConfig");
 initializePassport(passport);
@@ -46,6 +47,7 @@ app.use(flash());
 app.use("/api/inventory/products", productRoutes);
 app.use("/api/inventory/suppliers", supplierRoutes);
 app.use("/api/inventory/categories", categoriesRoutes);
+app.use("/api/inventory/orders", orderRoutes);
 app.use("/api/v1/users", userRoutes);
 
 
@@ -156,6 +158,7 @@ app.get('/api/counts', async (req, res) => {
       res.status(500).json({ error: 'Error retrieving counts', details: err.message });
     }
   });
+
 
 
 

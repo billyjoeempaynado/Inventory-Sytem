@@ -27,7 +27,7 @@ function fetchAndPopulateSuppliers() {
     .catch(error => console.error('Error fetching suppliers:', error));
 }
 
-
+//fetch categories dropdown
 function fetchAndPopulateCategories() {
   const categoryDropdown = document.getElementById('categoryDropdown');
   // console.log('Dropdown Element:', supplierDropdown); // Check if the element is found
@@ -288,10 +288,8 @@ export function openEditProductModal(productId, productName, price, sellingPrice
 }
 
 
-
-
 // Function to close the Item Modal
-export function closeProductModal() {
+ function closeProductModal() {
   document.getElementById('productForm').reset(); // Clear the form
   document.getElementById('productModal').classList.add('hidden');
 }
@@ -310,7 +308,7 @@ document.getElementById('productForm').addEventListener('submit', function(event
 
 
   if (mode === 'add') {
-    // Add a new item
+    // Add a new product
     fetch('http://localhost:8080/api/inventory/products/products', {
       method: 'POST',
       body: JSON.stringify({ 
@@ -338,7 +336,7 @@ document.getElementById('productForm').addEventListener('submit', function(event
       fetchProducts();  // Refresh the product list
     })
     .catch(error => {
-      console.error('Error adding item:', error);  // Log any error
+      console.error('Error adding product:', error);  // Log any error
     });
     
   }   else if (mode === 'edit') {
@@ -367,7 +365,7 @@ document.getElementById('productForm').addEventListener('submit', function(event
       return response.text();  // Expecting plain text response, not JSON
     })
     .then(data => {
-      console.log('productupdated response data:', data); // Log response data
+      console.log('product updated response data:', data); // Log response data
       showAlertMessage('product updated successfully!', 'success');
       fetchProducts();  // Refresh the product list
     })

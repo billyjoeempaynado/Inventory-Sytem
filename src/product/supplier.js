@@ -3,7 +3,7 @@ const suppliersPerPage = 6;
 
 // Fetch and display Suppliers
 export function fetchSuppliers() {
-    fetch('http://localhost:8080/api/inventory/suppliers/suppliers')
+    fetch('http://localhost:8080/api/inventory/suppliers')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -229,7 +229,7 @@ document.getElementById('supplierForm').addEventListener('submit', function(even
 
   if (mode === 'add') {
     // Add a new item
-    fetch('http://localhost:8080/api/inventory/suppliers/suppliers', {
+    fetch('http://localhost:8080/api/inventory/suppliers', {
       method: 'POST',
       body: JSON.stringify({ 
         supplier_name: supplierName.trim(),
@@ -261,7 +261,7 @@ document.getElementById('supplierForm').addEventListener('submit', function(even
     // Edit an existing item
     const supplierId = supplierForm.getAttribute('data-id');
     console.log('Editing supplier with ID:', supplierId); // Log the item ID being edited
-    fetch(`http://localhost:8080/api/inventory/suppliers/suppliers/${supplierId}`, {
+    fetch(`http://localhost:8080/api/inventory/suppliers/${supplierId}`, {
       method: 'PUT',
       body: JSON.stringify({ 
         supplier_name: supplierName.trim(),
@@ -305,7 +305,7 @@ export function deleteSupplier(event) {
   alertify.confirm("Are you sure you want to delete this supplier?",
   function(){  // User clicked 'Ok'
       // Proceed to delete the item
-      fetch(`http://localhost:8080/api/inventory/suppliers/suppliers/${supplierId}`, {
+      fetch(`http://localhost:8080/api/inventory/suppliers/${supplierId}`, {
           method: 'DELETE'
       })
       .then(response => {

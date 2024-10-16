@@ -13,7 +13,7 @@ function fetchAndPopulateSuppliers() {
   }
 
   // Proceed with fetching suppliers if the element exists
-  fetch('http://localhost:8080/api/inventory/suppliers/suppliers')
+  fetch('http://localhost:8080/api/inventory/suppliers')
     .then(response => response.json())
     .then(suppliers => {
       supplierDropdown.innerHTML = '<option value="">Select a supplier</option>'; // Reset dropdown options
@@ -56,7 +56,7 @@ function fetchAndPopulateCategories() {
 
 // Fetch and display products
 export function fetchProducts() {
-    fetch('http://localhost:8080/api/inventory/products/products')
+    fetch('http://localhost:8080/api/inventory/products')
         .then(response => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');
@@ -119,7 +119,7 @@ export function displayProducts(products) {
           const row = document.createElement('tr');
 
           row.innerHTML = `
-              <td class="py-4 px-6 text-sm text-gray-500"></td>
+              <td class="py-4 px-6 text-sm text-gray-500">${product.product_code}</td>
               <td class="py-4 px-6 text-sm text-gray-900">${product.product_name}</td>
               <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.selling_price}  </td>
               <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.purchase_price}</td>
@@ -136,8 +136,7 @@ export function displayProducts(products) {
               </td>
           `;
           tableBody.appendChild(row);
-          // console.log(`Product: ${product.product_name}`);
-          // console.log(`Supplier: ${product.supplier_name ? product.supplier_name : 'No Supplier Assigned'}`);
+
       });
       
       // Attach event listeners after adding rows
@@ -217,7 +216,8 @@ function attachProductEventListeners() {
             productToEdit.purchase_price,
             productToEdit.selling_price,
             productToEdit.reorder_level,
-            productToEdit.supplier_id // Pass the supplier ID here
+            productToEdit.supplier_id,
+            productToEdit.product_code // Pass the supplier ID here
           );
       } else {
           console.error('Product not found:', productId);
@@ -242,6 +242,7 @@ export function openAddProductModal() {
   document.getElementById('price').value = '';
   document.getElementById('sellingPrice').value = '';
   document.getElementById('reorderLevel').value = '';
+  document.getElementById('productCode').value = '';
   
 
   // Update modal title and button text for "Add"
@@ -261,7 +262,7 @@ export function openAddProductModal() {
 
 
 // Function to open the Item Modal (for both Add and Edit)
-export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel) {
+export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel, productCode) {
   const productForm = document.getElementById('productForm');
   productForm.setAttribute('data-mode', 'edit');  // Set form mode to 'edit'
   productForm.setAttribute('data-id', productId); // Set the form's data-id to the productId
@@ -269,12 +270,14 @@ export function openEditProductModal(productId, productName, price, sellingPrice
   // Populate the visible Product ID field and disable it
   const productCodeField = document.getElementById('productCode');
   productCodeField.disabled = true; // Disable the field to prevent editing
-
+ console.log(productCode);
+ console.log(productName);
   // Populate the form fields with the item data
   document.getElementById('productName').value = productName;
   document.getElementById('price').value = price;
   document.getElementById('sellingPrice').value = sellingPrice;
   document.getElementById('reorderLevel').value = reorderLevel;
+  document.getElementById('productCode').value = productCode;
 
   // Update modal title and button text for "Edit"
   document.getElementById('productModalTitle').innerText = 'Edit Product';
@@ -285,6 +288,7 @@ export function openEditProductModal(productId, productName, price, sellingPrice
 
   // Fetch suppliers and populate the dropdown (if not already populated)
   fetchAndPopulateSuppliers();
+  fetchAndPopulateCategories();
 }
 
 
@@ -303,19 +307,21 @@ document.getElementById('productForm').addEventListener('submit', function(event
   const price = document.getElementById('price').value.trim();
   const sellingPrice = document.getElementById('sellingPrice').value.trim();
   const reorderLevel = document.getElementById('reorderLevel').value.trim();
+  const productCode = document.getElementById('productCode').value.trim();
   const supplierId = document.getElementById('supplierDropdown').value;  // Capture supplier ID
   const categoryId = document.getElementById('categoryDropdown').value;
 
 
   if (mode === 'add') {
     // Add a new product
-    fetch('http://localhost:8080/api/inventory/products/products', {
+    fetch('http://localhost:8080/api/inventory/products', {
       method: 'POST',
       body: JSON.stringify({ 
         product_name: productName.trim(),
         purchase_price: price.trim(),
         selling_price: sellingPrice.trim(),
         reorder_level: reorderLevel.trim(),
+        product_code: productCode.trim(),
         supplier_id: supplierId,
         category_id: categoryId
         
@@ -343,7 +349,7 @@ document.getElementById('productForm').addEventListener('submit', function(event
     // Edit an existing item
     const productId = productForm.getAttribute('data-id');
     console.log('Editing product with ID:', productId); // Log the item ID being edited
-    fetch(`http://localhost:8080/api/inventory/products/products/${productId}`, {
+    fetch(`http://localhost:8080/api/inventory/products/${productId}`, {
       method: 'PUT',
       body: JSON.stringify({ 
         product_name: productName,  // changed to product_name
@@ -351,7 +357,8 @@ document.getElementById('productForm').addEventListener('submit', function(event
         selling_price: sellingPrice,
         reorder_level: reorderLevel, 
         supplier_id: supplierId,
-        category_id: categoryId
+        category_id: categoryId,
+        product_code: productCode
       }),
       headers: {
         'Content-Type': 'application/json'
@@ -388,7 +395,7 @@ export function deleteProduct(event) {
   alertify.confirm("Are you sure you want to delete this product?",
   function(){  // User clicked 'Ok'
       // Proceed to delete the item
-      fetch(`http://localhost:8080/api/inventory/products/products/${productId}`, {
+      fetch(`http://localhost:8080/api/inventory/products/${productId}`, {
           method: 'DELETE'
       })
       .then(response => {

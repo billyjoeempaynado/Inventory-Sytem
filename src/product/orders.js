@@ -10,39 +10,39 @@ function fetchAndPopulateProducts() {
   }
 
   // Fetch the products from your API
-  fetch('http://localhost:8080/api/inventory/products/products')
-    .then(response => response.json())
-    .then(products => {
-      productList.innerHTML = '<option value="">Select a product</option>'; // Reset dropdown options
-      products.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.product_id; // Assuming product_id is the ID
-        option.text = product.product_name; // Product name
-        option.dataset.price = product.price; // Set price as data attribute
-        productList.appendChild(option);
-      });
+  fetch('http://localhost:8080/api/inventory/products')
+  .then(response => response.json())
+  .then(products => {
+    productList.innerHTML = '<option value="">Select a product</option>'; // Reset dropdown options
+    products.forEach(product => {
+      const option = document.createElement('option');
+      option.value = product.product_id; // Assuming product_id is the ID
+      option.text = product.product_name; // Product name
+      option.dataset.price = product.price; // Set price as data attribute
+      productList.appendChild(option);
+    });
 
-      // Add an event listener for when the product is selected
-      productList.addEventListener('change', (event) => {
-        const selectedOption = event.target.selectedOptions[0];
-        const orderPriceInput = document.getElementById('orderPrice');
+    // Add an event listener for when the product is selected
+    productList.addEventListener('change', (event) => {
+      const selectedOption = event.target.selectedOptions[0];
+      const orderPriceInput = document.getElementById('orderPrice');
 
-        if (selectedOption) {
-          console.log('Selected option:', selectedOption); // Debugging log
-          const price = selectedOption.dataset.price;
+      if (selectedOption) {
+        console.log('Selected option:', selectedOption); // Debugging log
+        const price = selectedOption.dataset.price;
 
-          if (price !== undefined) {
-            orderPriceInput.value = price; // Set the price in the input field
-          } else {
-            console.error('Price is undefined for the selected option');
-            orderPriceInput.value = ''; // Clear the input if undefined
-          }
+        if (price !== undefined) {
+          orderPriceInput.value = price; // Set the price in the input field
         } else {
-          orderPriceInput.value = ''; // Clear the input if no product is selected
+          console.error('Price is undefined for the selected option');
+          orderPriceInput.value = ''; // Clear the input if undefined
         }
-      });
-    })
-    .catch(error => console.error('Error fetching products:', error));
+      } else {
+        orderPriceInput.value = ''; // Clear the input if no product is selected
+      }
+    });
+  })
+  .catch(error => console.error('Error fetching products:', error));
 }
 
 export function fetchOrders(){
@@ -218,6 +218,8 @@ export function openAddOrderModal() {
   document.getElementById('customerName').value = '';
   document.getElementById('orderDate').value = '';
   document.getElementById('status').value = '';
+  document.getElementById('quantity').value = '';
+  document.getElementById('orderPrice').value = '';
 
 
   document.getElementById('orderModalTitle').innerText = 'Create Order';
@@ -239,6 +241,7 @@ export function openEditOrderModal(orderId, customerName, orderDate, status){
   document.getElementById('customerName').value = customerName;
   document.getElementById('orderDate').value = orderDate;
   document.getElementById('status').value = status;
+  document.getElementById('quantity').value = quantity;
 
   document.getElementById('orderModalTitle').innerText = 'Edit Order';
   document.getElementById('orderSubmitButton').innerText = 'Update';
@@ -249,12 +252,59 @@ export function openEditOrderModal(orderId, customerName, orderDate, status){
 
 }
 
-export function closeOrderModal() {
-  document.getElementById('orderForm').reset();
+
+
+// Function to create a new order
+function createOrder(customerName, orderDate, status) {
+  return fetch('http://localhost:8080/api/inventory/orders', {
+    method: 'POST',
+    body: JSON.stringify({
+      customer_name: customerName,
+      order_date: orderDate,
+      status: status
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to create order');
+    }
+    return response.json();
+  });
+}
+
+function addOrderItem(orderId, productId, quantity, price) {
+  return fetch(`http://localhost:8080/api/inventory/orders/${orderId}/items`, {
+    method: 'POST',
+    body: JSON.stringify({
+      order_id: orderId,
+      product_id: productId,
+      quantity: quantity,
+      price: price
+    }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  }).then(itemResponse => {
+    if (!itemResponse.ok) {
+      throw new Error('Failed to add order item');
+    }
+    return itemResponse.json();
+  });
+}
+
+
+// Function to close the Item Modal
+function closeOrderModal() {
+  document.getElementById('orderForm').reset(); // Clear the form
   document.getElementById('orderModal').classList.add('hidden');
 }
 
-document.getElementById('orderForm').addEventListener('submit', function(event){
+
+
+// Function to handle form submission for creating or updating an order
+function submitOrderForm(event) {
   event.preventDefault();
   const orderForm = event.target;
   const mode = orderForm.getAttribute('data-mode');
@@ -262,37 +312,33 @@ document.getElementById('orderForm').addEventListener('submit', function(event){
   const customerName = document.getElementById('customerName').value.trim();
   const orderDate = document.getElementById('orderDate').value.trim();
   const status = document.getElementById('status').value.trim();
+  const quantity = document.getElementById('quantity').value.trim();
+  const productId = document.getElementById('productList').value.trim();
+  const price = document.getElementById('orderPrice').value.trim();
 
-  if (mode === 'add'){
-
-    fetch('http://localhost:8080/api/inventory/orders', {
-      method: 'POST',
-      body: JSON.stringify({
-        customer_name: customerName,
-        order_date: orderDate,
-        status: status
-      }),
-      headers: {
-        'Content-Type' : 'application/json'
-      }
-    })
-    .then(response => {
-      if(!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();
-    })
-    .then(data => {
-      console.log('Order Added response data:', data);
-
-      showAlertMessage('order added successfully!', 'success');
-      fetchOrders();
-    })
-    .catch(error => {
-      console.error('Error Adding order:', error);
-    });
-
-  } else if(mode === 'edit') {
+  if (mode === 'add') {
+    createOrder(customerName, orderDate, status)
+      .then(order => {
+        console.log('Order created:', order);
+        const orderId = order.order_id;
+        showAlertMessage('Order created successfully!', 'success');
+        
+        closeOrderModal(); // Close the modal after creating the order
+        fetchOrders(); // Refresh the list of orders
+  
+        // Now try to add the order item
+        return addOrderItem(orderId, productId, quantity, price);
+      })
+      .then(itemData => {
+        console.log('Item added successfully:', itemData);
+        showAlertMessage('Order item added successfully!', 'success');
+      })
+      .catch(error => {
+        console.error('Error adding order or item:', error);
+        showAlertMessage('Order created, but failed to add item: ' + error.message, 'danger');
+      });
+  }
+   else if (mode === 'edit') {
     const orderId = orderForm.getAttribute('data-id');
     console.log('Editing order with ID:', orderId);
 
@@ -309,25 +355,28 @@ document.getElementById('orderForm').addEventListener('submit', function(event){
     })
     .then(response => {
       console.log('Response status:', response.status);
-
-      if(!response.ok) {
+      if (!response.ok) {
         throw new Error('Network response was not ok');
       }
       return response.text();
     })
     .then(data => {
-      console.log('Order updated response data:', data);
-
-      showAlertMessage('order updated successfully!', 'success');
-      fetchOrders();
+      showAlertMessage('Order updated successfully!', 'success');
+      closeOrderModal(); // Close the modal after updating order
+      fetchOrders(); // Refresh the orders list
     })
     .catch(error => {
       console.error('Error updating order:', error);
+      showAlertMessage('Error updating order: ' + error.message, 'danger');
     });
   }
+}
 
-  closeOrderModal();
-});
+
+// Attach the event listener to the order form
+document.getElementById('orderForm').addEventListener('submit', submitOrderForm);
+
+
 
 export function deleteOrder(event) {
   const orderId = event.target.closest('button').getAttribute('data-id');
@@ -368,26 +417,21 @@ export function deleteOrder(event) {
 }
 
 
-
-
-  // Function to show alert messages
-  function showAlertMessage(message, type) {
-    if (type === 'success') {
-      alertify.success(message);  // Success alert
+function showAlertMessage(message, type) {
+  console.log(`Showing alert: ${message}, Type: ${type}`); // Debugging log
+  if (type === 'success') {
+    alertify.success(message);  // Success alert
   } else if (type === 'error') {
-      alertify.error(message);  // Error alert
+    alertify.error(message);  // Error alert
   } else if (type === 'warning') {
-      alertify.warning(message);  // Warning alert
+    alertify.warning(message);  // Warning alert
   } else if (type === 'danger') {
-      alertify.error(message);  // Using error for danger in Alertify
+    alertify.error(message);  // Using error for danger in Alertify
   } else if (type === 'message') {
-      alertify.message(message);  // General message alert
+    alertify.message(message);  // General message alert
   }
-  }
-  
-  
-  
-  
-  
-  alertify.set('notifier', 'position', 'top-right');  // Set position of notifications
-  alertify.set('notifier', 'delay', 3); 
+}
+
+// Ensure Alertify settings are applied correctly
+alertify.set('notifier', 'position', 'top-right');  // Set position of notifications
+alertify.set('notifier', 'delay', 3);  // Set delay for the alerts to disappear

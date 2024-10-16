@@ -14,6 +14,4 @@ module.exports = {
   addSupplier,
   deleteSupplier,
   updateSupplier
-  // checkEmailExist,
-  // addStudent
 };

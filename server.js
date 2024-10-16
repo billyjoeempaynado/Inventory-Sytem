@@ -15,6 +15,7 @@ const productRoutes = require("./src/product/productRoutes");
 const categoriesRoutes = require("./src/product/categoriesRoutes");
 const orderRoutes = require("./src/product/orderRoutes");
 
+
 const initializePassport = require("./passportConfig");
 initializePassport(passport);
 

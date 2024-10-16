@@ -21,7 +21,7 @@ const getProductById = (req, res) => {
 };
 
 const addProduct = (req, res) => {
-  const { product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level } = req.body;
+  const {product_code, product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level } = req.body;
 
   // Log the entire request body for debugging
   console.log("Request Body:", req.body);
@@ -32,7 +32,7 @@ const addProduct = (req, res) => {
   }
 
   // Proceed with inserting product if validation passes
-  pool.query(queries.addProduct, [product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level], (error, results) => {
+  pool.query(queries.addProduct, [product_code, product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level], (error, results) => {
     if (error) {
       console.error("Error adding product:", error);
       return res.status(500).json({ error: "Failed to add product" });
@@ -45,33 +45,52 @@ const addProduct = (req, res) => {
 
 const deleteProduct = (req, res) => {
   const product_id = parseInt(req.params.product_id);
+  
+  if (isNaN(product_id)) {
+      return res.status(400).json({ error: "Invalid product ID." });
+  }
 
-  pool.query(queries.getProductById, [product_id], (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: "Failed to delete product" });
-    }
-
-    const noItemFound = !results.rows.length;
-    if (noItemFound) {
-      return res.status(404).send("Product does not exist in the database");
-    }
-
-    pool.query(queries.deleteProduct, [product_id], (error, results) => {
+  // Check if the product exists in order items
+  pool.query(`SELECT COUNT(*) FROM order_items WHERE product_id = $1`, [product_id], (error, results) => {
       if (error) {
-        return res.status(500).json({ error: "Failed to remove product" });
+          console.error("Error checking order items for product_id:", product_id, error);
+          return res.status(500).json({ error: "Failed to check order items." });
       }
-      res.status(200).send("Product removed successfully.");
-    });
+
+      if (parseInt(results.rows[0].count) > 0) {
+          return res.status(400).json({ error: "Cannot delete product; it is associated with existing order items." });
+      }
+
+      // Proceed to delete the product if it has no associated order items
+      pool.query(`DELETE FROM products WHERE product_id = $1`, [product_id], (error) => {
+          if (error) {
+              console.error("Error deleting product with product_id:", product_id, error);
+              return res.status(500).json({ error: "Failed to remove product." });
+          }
+          res.status(200).json({ message: "Product removed successfully." });
+      });
   });
 };
 
+
+
+
+
+
+
 const updateProduct = (req, res) => {
   const product_id = parseInt(req.params.product_id);
-  const { product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level } = req.body;
+  const { product_code, product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level } = req.body;
+
+  // Check if all required fields are provided
+  if (!product_code || !product_name || !purchase_price || !selling_price || !category_id || !supplier_id) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
 
   pool.query(queries.getProductById, [product_id], (error, results) => {
     if (error) {
-      return res.status(500).json({ error: "Failed to update product" });
+      console.error("Error fetching product:", error);
+      return res.status(500).json({ error: "Failed to fetch product" });
     }
 
     const noItemFound = !results.rows.length;
@@ -79,12 +98,15 @@ const updateProduct = (req, res) => {
       return res.status(404).send("Product does not exist in the database");
     }
 
-    pool.query(queries.updateProduct, [product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level, product_id], (error, results) => {
-      if (error) {
-        return res.status(500).json({ error: "Failed to update product" });
-      }
-      res.status(200).send("Product updated successfully");
-    });
+    pool.query(queries.updateProduct, 
+      [product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level, product_code, product_id], 
+      (error, results) => {
+        if (error) {
+          console.error("Error updating product:", error);
+          return res.status(500).json({ error: "Failed to update product" });
+        }
+        res.status(200).send("Product updated successfully");
+      });
   });
 };
 

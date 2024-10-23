@@ -1,3 +1,4 @@
+
 const getProducts = `
 SELECT 
     p.product_id,  
@@ -17,10 +18,9 @@ LEFT JOIN
     suppliers s ON p.supplier_id = s.supplier_id
 LEFT JOIN 
     categories c ON p.category_id = c.category_id;
-
 `;
 const getProductById = "SELECT * FROM products WHERE product_id = $1";
-const addProduct = "INSERT INTO products (product_code, product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)";
+const addProduct = "INSERT INTO products (product_name, purchase_price, description, category_id, supplier_id, selling_price, quantity_instock, reorder_level, product_code ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)";
 const updateProduct = "UPDATE products SET product_name = $1, purchase_price = $2, description = $3, category_id = $4, supplier_id = $5, selling_price = $6, quantity_instock = $7, reorder_level = $8, product_code = $9 WHERE product_id = $10";
 const deleteProduct = "DELETE FROM products WHERE product_id = $1";
 

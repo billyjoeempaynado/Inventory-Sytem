@@ -9,40 +9,50 @@ function fetchAndPopulateProducts() {
     return;
   }
 
-  // Fetch the products from your API
-  fetch('http://localhost:8080/api/inventory/products')
+
+
+// Fetch the products from your API
+fetch('http://localhost:8080/api/inventory/products')
   .then(response => response.json())
   .then(products => {
+    const productList = document.getElementById('productList');
     productList.innerHTML = '<option value="">Select a product</option>'; // Reset dropdown options
+
+    // Populate the product dropdown
     products.forEach(product => {
       const option = document.createElement('option');
       option.value = product.product_id; // Assuming product_id is the ID
       option.text = product.product_name; // Product name
-      option.dataset.price = product.price; // Set price as data attribute
+      option.dataset.price = product.selling_price || ''; // Store selling price in a data attribute
       productList.appendChild(option);
-    });
-
-    // Add an event listener for when the product is selected
-    productList.addEventListener('change', (event) => {
-      const selectedOption = event.target.selectedOptions[0];
-      const orderPriceInput = document.getElementById('orderPrice');
-
-      if (selectedOption) {
-        console.log('Selected option:', selectedOption); // Debugging log
-        const price = selectedOption.dataset.price;
-
-        if (price !== undefined) {
-          orderPriceInput.value = price; // Set the price in the input field
-        } else {
-          console.error('Price is undefined for the selected option');
-          orderPriceInput.value = ''; // Clear the input if undefined
-        }
-      } else {
-        orderPriceInput.value = ''; // Clear the input if no product is selected
-      }
     });
   })
   .catch(error => console.error('Error fetching products:', error));
+
+// Add an event listener to the product dropdown
+document.getElementById('productList').addEventListener('change', (event) => {
+  const selectedOption = event.target.selectedOptions[0]; // Get the selected option
+  const orderPriceInput = document.getElementById('orderPrice'); // Price input field
+  
+
+  if (selectedOption && selectedOption.value) {
+    const price = selectedOption.dataset.price; // Get the price from the data attribute
+    console.log('Selected product price:', price); // Debugging: check the price value
+
+    // Check if the price is a valid number
+    if (price && !isNaN(price)) {
+      orderPriceInput.value = parseFloat(price).toFixed(2); // Set price to 2 decimal places
+      console.log('Price set in field:', orderPriceInput.value); // Debugging: check if price is set
+    } else {
+      orderPriceInput.value = ''; // Clear the input if the price is invalid
+      console.log('Invalid price or no price, clearing field.'); // Debugging: log if no price is set
+    }
+  } else {
+    orderPriceInput.value = ''; // Clear the input if no product is selected
+    console.log('No product selected, clearing price field.'); // Debugging: log if no product selected
+  }
+});
+ 
 }
 
 export function fetchOrders(){
@@ -102,19 +112,29 @@ export function displayOrders(orders) {
       paginatedOrders.forEach(order => {
           const row = document.createElement('tr');
           row.innerHTML = `
-              <td class="py-4 px-6 text-sm text-gray-500">${order.customer_name}</td>
-              <td class="py-4 px-6 text-sm text-gray-900">${order.order_date}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">${order.status}</td>
-              <td class="py-4 px-6 text-sm text-gray-500"></td>
-              <td class="sm:flex py-4 px-6 text-sm">
-                  <button data-id="${order.order_id}" class="edit-order-btn p-2 text-gray-700 hover:text-gray-500">
-                      <i class="fa-solid fa-pen-to-square"></i>
-                  </button>
-                  <button data-id="${order.order_id}" class="delete-order-btn p-2 text-red-700 hover:text-red-500">
-                      <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
-                  </button>
-              <td class="py-4 px-6 text-sm text-gray-500"></td>          
-              </td>
+                    <td class="py-4 px-6 text-sm text-gray-500 text-center">${order.customer_name}</td>
+                    <td class="py-4 px-6 text-sm text-gray-900 text-center">${order.order_date}</td>
+                    <td class="py-4 px-6 text-sm text-gray-500 text-center">${order.status}</td>
+                    <td class="py-4 px-6 text-sm text-gray-500 text-center">&#8369; ${order.total_amount}</td>
+                    
+                    <td class="py-4 px-6 text-sm">
+                      <div class="flex items-center justify-center space-x-2">
+                        <button data-id="${order.order_id}" class="edit-order-btn p-2 text-gray-700 hover:text-gray-500">
+                          <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
+                        <button data-id="${order.order_id}" class="delete-order-btn p-2 text-red-700 hover:text-red-500">
+                          <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
+                        </button>
+                      </div>
+                    </td>
+
+                    <td class="py-4 px-6 text-sm text-gray-500">
+                      <div class="flex items-center justify-center space-x-2">
+                        <a  href="#" id="viewDetailsButton" data-id="${order.order_id}" class="viewDetailsButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded">
+                          View
+                        </a>
+                      </div>
+                    </td>
           `;
           tableBody.appendChild(row);
       });
@@ -206,15 +226,59 @@ function attachOrderEventListeners() {
   document.querySelectorAll('.delete-order-btn').forEach(button => {
     button.addEventListener('click', deleteOrder);
   });
+
+  document.querySelectorAll('.viewDetailsButton').forEach(button => {
+    button.addEventListener('click', async (event) => {
+      event.preventDefault(); // Prevent the default anchor behavior
+      const orderId = event.currentTarget.getAttribute('data-id');
+      console.log('View button clicked for Order ID:', orderId);
+
+      try {
+        // Fetch the order details from the server
+        const response = await fetch(`/api/inventory/orders/${orderId}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const orderDetails = await response.json();
+
+        // Update the orderDetailSection in your dashboard
+        loadOrderDetails(orderDetails);
+      } catch (error) {
+        console.error('Error fetching order details:', error);
+      }
+    });
+  });
+
 }
 
+function loadOrderDetails(orderDetails) {
+  const ordersSection = document.getElementById('ordersSection'); // Ensure this ID matches your orders section
+  const orderDetailSection = document.getElementById('orderDetailSection'); // Ensure this ID matches your order detail section
+  
+  // Clear any existing content
+  orderDetailSection.innerHTML = '';
 
+  // Populate the section with order details
+  orderDetailSection.innerHTML = `
+    <h2 class="text-lg font-semibold">Order Details</h2>
+    <p><strong>Customer Name:</strong> ${orderDetails.customer_name}</p>
+    <p><strong>Order Date:</strong> ${orderDetails.order_date}</p>
+    <p><strong>Status:</strong> ${orderDetails.status}</p>
+    <p><strong>Total Amount:</strong> &#8369; ${orderDetails.total_amount}</p>
+    <!-- Add more details as needed -->
+  `;
+
+  ordersSection.classList.add('hidden'); // Hide the orders section
+  // Optionally, show the order detail section if it's hidden
+  orderDetailSection.classList.remove('hidden'); // Assuming you have a class to hide it
+}
 
 
 export function openAddOrderModal() {
   const orderForm = document.getElementById('orderForm');
+  const orderPrice = document.getElementById('orderPrice');
+  orderPrice.disabled = true;
   orderForm.setAttribute('data-mode', 'add');
 
+  
   document.getElementById('customerName').value = '';
   document.getElementById('orderDate').value = '';
   document.getElementById('status').value = '';
@@ -255,8 +319,8 @@ export function openEditOrderModal(orderId, customerName, orderDate, status){
 
 
 // Function to create a new order
-function createOrder(customerName, orderDate, status) {
-  return fetch('http://localhost:8080/api/inventory/orders', {
+async function createOrder(customerName, orderDate, status) {
+  const response = await fetch('http://localhost:8080/api/inventory/orders', {
     method: 'POST',
     body: JSON.stringify({
       customer_name: customerName,
@@ -266,16 +330,15 @@ function createOrder(customerName, orderDate, status) {
     headers: {
       'Content-Type': 'application/json'
     }
-  }).then(response => {
-    if (!response.ok) {
-      throw new Error('Failed to create order');
-    }
-    return response.json();
   });
+  if (!response.ok) {
+    throw new Error('Failed to create order');
+  }
+  return await response.json();
 }
 
-function addOrderItem(orderId, productId, quantity, price) {
-  return fetch(`http://localhost:8080/api/inventory/orders/${orderId}/items`, {
+async function addOrderItem(orderId, productId, quantity, price) {
+  const itemResponse = await fetch(`http://localhost:8080/api/inventory/orders/${orderId}/items`, {
     method: 'POST',
     body: JSON.stringify({
       order_id: orderId,
@@ -286,22 +349,18 @@ function addOrderItem(orderId, productId, quantity, price) {
     headers: {
       'Content-Type': 'application/json'
     }
-  }).then(itemResponse => {
-    if (!itemResponse.ok) {
-      throw new Error('Failed to add order item');
-    }
-    return itemResponse.json();
   });
+  if (!itemResponse.ok) {
+    throw new Error('Failed to add order item');
+  }
+  return await itemResponse.json();
 }
 
 
-// Function to close the Item Modal
 function closeOrderModal() {
   document.getElementById('orderForm').reset(); // Clear the form
   document.getElementById('orderModal').classList.add('hidden');
 }
-
-
 
 // Function to handle form submission for creating or updating an order
 function submitOrderForm(event) {
@@ -315,6 +374,8 @@ function submitOrderForm(event) {
   const quantity = document.getElementById('quantity').value.trim();
   const productId = document.getElementById('productList').value.trim();
   const price = document.getElementById('orderPrice').value.trim();
+
+
 
   if (mode === 'add') {
     createOrder(customerName, orderDate, status)
@@ -331,43 +392,68 @@ function submitOrderForm(event) {
       })
       .then(itemData => {
         console.log('Item added successfully:', itemData);
-        showAlertMessage('Order item added successfully!', 'success');
+       
       })
       .catch(error => {
         console.error('Error adding order or item:', error);
         showAlertMessage('Order created, but failed to add item: ' + error.message, 'danger');
       });
   }
-   else if (mode === 'edit') {
-    const orderId = orderForm.getAttribute('data-id');
-    console.log('Editing order with ID:', orderId);
+  else if (mode === 'edit') {
+    const orderId = orderForm.getAttribute('data-id');  
+    const productDropdown = document.getElementById('productList');
+    const productId = productDropdown.value;
+    
+    const selectedOption = productDropdown.options[productDropdown.selectedIndex];
+    const price = parseFloat(selectedOption.getAttribute('data-price')).toFixed(2);  // Convert price to float with two decimals
 
-    fetch(`http://localhost:8080/api/inventory/orders/${orderId}`, {
-      method: 'PUT',
-      body: JSON.stringify({
+    const quantity = document.getElementById('quantity').value;
+    const customerName = document.getElementById('customerName').value;
+    const orderDate = document.getElementById('orderDate').value;
+    const status = document.getElementById('status').value;
+
+    // Prepare the data to send to the server
+    const orderData = {
         customer_name: customerName,
         order_date: orderDate,
-        status: status
-      }),
-      headers: {
-        'Content-Type': 'application/json'
-      }
+        status: status,
+        items: [
+            {
+                product_id: Number(productId),
+                quantity: Number(quantity),
+                price: parseFloat(price)  // Ensure price is a float
+            }
+        ]
+    };
+
+    console.log('Order ID:', orderId);
+    console.log('Payload being sent:', orderData);
+    
+    // Make the API call to update both order and items
+    fetch(`http://localhost:8080/api/inventory/orders/${orderId}/items`, {
+        method: 'PUT',
+        body: JSON.stringify(orderData),
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
     .then(response => {
-      console.log('Response status:', response.status);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();
+        if (!response.ok) {
+            return response.json().then(err => {
+                throw new Error(err.message || 'Network response was not ok');
+            });
+        }
+        return response.json();
     })
-    .then(data => {
-      showAlertMessage('Order updated successfully!', 'success');
-      closeOrderModal(); // Close the modal after updating order
-      fetchOrders(); // Refresh the orders list
+    .then(orderUpdateResponse => {
+        console.log('Order and items updated successfully:', orderUpdateResponse);
+        showAlertMessage('Order and items updated successfully!', 'success');
+        closeOrderModal(); // Close the modal after updating order
+        fetchOrders(); // Refresh the orders list
     })
     .catch(error => {
-      console.error('Error updating order:', error);
-      showAlertMessage('Error updating order: ' + error.message, 'danger');
+        console.error('Error updating order and items:', error);
+        showAlertMessage('Error updating order and items: ' + error.message, 'danger');
     });
   }
 }

@@ -65,26 +65,32 @@
                   <span>Orders</span>
               </a>
           </li>
-       <!--   <li>
-              <a href="" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+        <li class="mb-2">
+              <a href="#" id="inventoryLevelButton" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
                   <span class=" text-gray-600">
-                      <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                      </svg>
+                    <i class="fa-solid fa-chart-line"></i>
                   </span>
-                  <span>My wishlist</span>
+                  <span>Inventory Level</span>
               </a>
           </li>
-          <li>
-              <a href="#" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+       <li class="mb-2">
+              <a href="#" id="reportsButton" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
                   <span class="text-gray-600">
                       <svg class="h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                       </svg>
                   </span>
-                  <span>Settings</span>
+                  <span>Reports</span>
               </a>
-          </li> -->
+          </li>
+          <li class="mb-2">
+            <a href="#" id="logsButton" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
+                <span class="text-gray-600">
+                    <i class="fa-solid fa-list"></i>
+                </span>
+                <span>Logs</span>
+            </a>
+        </li>
           <li class="mt-60">
               <a href="#" class="flex items-center space-x-3 text-gray-700 p-2 rounded-md font-medium hover:bg-gray-200 focus:bg-gray-200 focus:shadow-outline">
                   <span class="text-gray-600">
@@ -157,6 +163,10 @@
     <%- include('products.ejs'); %>
     <%- include('suppliers.ejs'); %>
     <%- include('orders.ejs'); %>
+    <%- include('inventorylevel.ejs'); %>
+    <%- include('reports.ejs'); %>
+    <%- include('logs.ejs'); %>
+    <%- include('orderdetail.ejs'); %>
 </div>
 </div>
 
@@ -184,6 +194,7 @@
   <script type="module" src="/product/orders.js"></script>
   <script type="module" src="/product/supplier.js"></script>
   <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.13.1/build/alertify.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
 </body>

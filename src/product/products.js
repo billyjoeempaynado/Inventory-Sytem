@@ -1,100 +1,89 @@
-
 let currentPage = 1;
 const productsPerPage = 6;
 
-
 // fetch the supplier name to dropdown
 function fetchAndPopulateSuppliers() {
-  const supplierDropdown = document.getElementById('supplierDropdown');
-  // console.log('Dropdown Element:', supplierDropdown); // Check if the element is found
-  if (!supplierDropdown) {
+  const $supplierDropdown = $('#supplierDropdown');
+  if ($supplierDropdown.length === 0) {
     console.error('supplierDropdown is undefined or null');
     return;
   }
 
   // Proceed with fetching suppliers if the element exists
-  fetch('http://localhost:8080/api/inventory/suppliers')
-    .then(response => response.json())
-    .then(suppliers => {
-      supplierDropdown.innerHTML = '<option value="">Select a supplier</option>'; // Reset dropdown options
+  $.getJSON('http://localhost:8080/api/inventory/suppliers')
+    .done(function (suppliers) {
+      $supplierDropdown.html('<option value="">Select a supplier</option>'); // Reset dropdown options
       suppliers.forEach(supplier => {
-        const option = document.createElement('option');
-        option.value = supplier.supplier_id; // Assuming supplier_id is the ID in your suppliers table
-        option.text = supplier.supplier_name; // Assuming supplier_name is the name in your suppliers table
-        supplierDropdown.appendChild(option);
+        $supplierDropdown.append($('<option>', {
+          value: supplier.supplier_id,
+          text: supplier.supplier_name
+        }));
       });
     })
-    .catch(error => console.error('Error fetching suppliers:', error));
+    .fail(function (error) {
+      console.error('Error fetching suppliers:', error);
+    });
 }
 
-//fetch categories dropdown
+// fetch categories dropdown
 function fetchAndPopulateCategories() {
-  const categoryDropdown = document.getElementById('categoryDropdown');
-  // console.log('Dropdown Element:', supplierDropdown); // Check if the element is found
-  if (!categoryDropdown) {
+  const $categoryDropdown = $('#categoryDropdown');
+  if ($categoryDropdown.length === 0) {
     console.error('categoryDropdown is undefined or null');
     return;
   }
 
-  // Proceed with fetching suppliers if the element exists
-  fetch('http://localhost:8080/api/inventory/categories')
-    .then(response => response.json())
-    .then(categpries => {
-      categoryDropdown.innerHTML = '<option value="">Select a category</option>'; // Reset dropdown options
-      categpries.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.category_id; // Assuming supplier_id is the ID in your suppliers table
-        option.text = category.category_name; // Assuming supplier_name is the name in your suppliers table
-        categoryDropdown.appendChild(option);
+  // Proceed with fetching categories if the element exists
+  $.getJSON('http://localhost:8080/api/inventory/categories')
+    .done(function (categories) {
+      $categoryDropdown.html('<option value="">Select a category</option>'); // Reset dropdown options
+      categories.forEach(category => {
+        $categoryDropdown.append($('<option>', {
+          value: category.category_id,
+          text: category.category_name
+        }));
       });
     })
-    .catch(error => console.error('Error fetching suppliers:', error));
+    .fail(function (error) {
+      console.error('Error fetching categories:', error);
+    });
 }
-
-
-
 
 // Fetch and display products
 export function fetchProducts() {
-    fetch('http://localhost:8080/api/inventory/products')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(products => {
-            localStorage.setItem('inventoryProducts', JSON.stringify(products));
-            displayProducts(products);
-        })
-        .catch(error => console.error('Error fetching products:', error));
+  $.getJSON('http://localhost:8080/api/inventory/products')
+    .done(function (products) {
+      localStorage.setItem('inventoryProducts', JSON.stringify(products));
+      displayProducts(products);
+    })
+    .fail(function (error) {
+      console.error('Error fetching products:', error);
+    });
 }
 
-
+// Debounce utility function
 function debounce(func, delay) {
   let timer;
   return function (...args) {
-      const context = this;
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-          func.apply(context, args);
-      }, delay);
+    const context = this;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(context, args);
+    }, delay);
   };
 }
 
-
-
 export function searchProducts() {
-  const searchQuery = document.getElementById('searchProductInput').value.trim().toLowerCase();
+  const searchQuery = $('#searchProductInput').val().trim().toLowerCase();
   const products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
 
-  const filteredProducts = products.filter(item => 
-      item.product_name.toLowerCase().includes(searchQuery) ||
-      String(item.purchase_price).toLowerCase().includes(searchQuery)  // Convert price to string
+  const filteredProducts = products.filter(item =>
+    item.product_name.toLowerCase().includes(searchQuery) ||
+    String(item.purchase_price).toLowerCase().includes(searchQuery)
   );
 
   // Reset pagination to page 1 when searching
-  currentPage = 1; 
+  currentPage = 1;
 
   // Display filtered items (make sure it handles pagination)
   displayProducts(filteredProducts);
@@ -103,53 +92,49 @@ export function searchProducts() {
 const debouncedSearchProducts = debounce(searchProducts, 300); // 300ms delay
 
 // Attach the debounced function to the input event
-document.getElementById('searchProductInput').addEventListener('input', debouncedSearchProducts);
+$('#searchProductInput').on('input', debouncedSearchProducts);
 
 export function displayProducts(products) {
   const totalPages = Math.ceil(products.length / productsPerPage);
   const paginatedProducts = paginate(products, currentPage, productsPerPage);
-  const tableBody = document.querySelector('#productTableBody');
-  tableBody.innerHTML = ''; // Clear existing rows
+  const $tableBody = $('#productTableBody');
+  $tableBody.empty(); // Clear existing rows
 
   if (paginatedProducts.length === 0) {
-      tableBody.innerHTML = '<tr><td colspan="3" class="mt-4 text-center">No product found.</td></tr>';
+    $tableBody.html('<tr><td colspan="3" class="mt-4 text-center">No product found.</td></tr>');
   } else {
-      paginatedProducts.forEach(product => {
-        
-          const row = document.createElement('tr');
+    paginatedProducts.forEach(product => {
+      const row = `
+     <tr>
+      <td class="py-4 px-6 text-sm text-gray-500 text-center">${product.product_code}</td>
+      <td class="py-4 px-6 text-sm text-gray-900 text-center">${product.product_name}</td>
+      <td class="py-4 px-6 text-sm text-gray-500 text-center">&#8369; ${product.selling_price}</td>
+      <td class="py-4 px-6 text-sm text-gray-500 text-center">&#8369; ${product.purchase_price}</td>
+      <td class="py-4 px-6 text-sm text-gray-500 text-center">${product.category_name}</td>
+      <td class="py-4 px-6 text-sm text-gray-500 text-center">${product.supplier_name || 'No Supplier Assigned'}</td>
+      <td class="py-4 px-6 text-sm text-gray-500 text-center">${product.reorder_level}</td>
+      <td class="py-4 px-6 text-sm">
+        <div class="flex items-center justify-center space-x-2">
+          <button data-id="${product.product_id}" class="edit-product-btn p-2 text-gray-700 hover:text-gray-500">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+          <button data-id="${product.product_id}" class="delete-product-btn p-2 text-red-700 hover:text-red-500">
+            <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+      $tableBody.append(row);
+    });
 
-          row.innerHTML = `
-              <td class="py-4 px-6 text-sm text-gray-500">${product.product_code}</td>
-              <td class="py-4 px-6 text-sm text-gray-900">${product.product_name}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.selling_price}  </td>
-              <td class="py-4 px-6 text-sm text-gray-500">&#8369; ${product.purchase_price}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">${product.category_name}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">${product.supplier_name || 'No Supplier Assigned'}</td>
-              <td class="py-4 px-6 text-sm text-gray-500"> ${product.reorder_level}</td>
-              <td class="sm:flex py-4 px-6 text-sm">
-                  <button data-id="${product.product_id}" class="edit-product-btn p-2 text-gray-700 hover:text-gray-500">
-                      <i class="fa-solid fa-pen-to-square"></i>
-                  </button>
-                  <button data-id="${product.product_id}" class="delete-product-btn p-2 text-red-700 hover:text-red-500">
-                      <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
-                  </button>
-              </td>
-          `;
-          tableBody.appendChild(row);
-
-      });
-      
-      // Attach event listeners after adding rows
-      attachProductEventListeners();
+    // Attach event listeners after adding rows
+    attachProductEventListeners();
   }
 
   // Add Pagination Controls
-  setupPaginationControls(totalPages, () => displayProducts(products));  // Use displayproduct for re-rendering
+  setupPaginationControls(totalPages, () => displayProducts(products));
 }
 
-
-
-// Pagination function to get products for the current page
 function paginate(products, page, productsPerPage) {
   const start = (page - 1) * productsPerPage;
   const end = start + productsPerPage;
@@ -157,104 +142,99 @@ function paginate(products, page, productsPerPage) {
 }
 
 function setupPaginationControls(totalPages, fetchProductsCallback) {
-  const productPaginationControls = document.getElementById('productPaginationControls');
-  productPaginationControls.innerHTML = ''; // Clear existing buttons
+  const $paginationControls = $('#productPaginationControls');
+  $paginationControls.empty(); // Clear existing buttons
 
-   // Previous Button
-   const productPrevButton = document.createElement('button');
-   productPrevButton.textContent = 'Previous';
-   productPrevButton.className = `px-4 py-2 rounded bg-gray-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`;
-   productPrevButton.disabled = currentPage === 1;
-   productPrevButton.addEventListener('click', () => {
-       if (currentPage > 1) {
-           currentPage--;
-           fetchProductsCallback();
-       }
-   });
-   productPaginationControls.appendChild(productPrevButton);
+  // Previous Button
+  const prevButton = $('<button>', {
+    text: 'Previous',
+    class: `px-4 py-2 rounded bg-gray-300 ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`,
+    disabled: currentPage === 1
+  }).on('click', function () {
+    if (currentPage > 1) {
+      currentPage--;
+      fetchProductsCallback();
+    }
+  });
+  $paginationControls.append(prevButton);
 
-   // Page Number Buttons
-   for (let page = 1; page <= totalPages; page++) {
-       const productPageButton = document.createElement('button');
-       productPageButton.textContent = page;
-       productPageButton.className = `px-4 py-2 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`;
-       
-       productPageButton.addEventListener('click', () => {
-           currentPage = page;
-           fetchProductsCallback();
-       });
+  // Page Number Buttons
+  for (let page = 1; page <= totalPages; page++) {
+    const pageButton = $('<button>', {
+      text: page,
+      class: `px-4 py-2 rounded ${page === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-300'}`
+    }).on('click', function () {
+      currentPage = page;
+      fetchProductsCallback();
+    });
+    $paginationControls.append(pageButton);
+  }
 
-      productPaginationControls.appendChild(productPageButton);
-   } 
-
-   // Next Button
-   const productNextButton = document.createElement('button');
-   productNextButton.textContent = 'Next';
-   productNextButton.className = `px-4 py-2 rounded bg-gray-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`;
-   productNextButton.disabled = currentPage === totalPages;
-   productNextButton.addEventListener('click', () => {
-       if (currentPage < totalPages) {
-           currentPage++;
-           fetchProductsCallback();
-       }
-   });
-   productPaginationControls.appendChild(productNextButton);
+  // Next Button
+  const nextButton = $('<button>', {
+    text: 'Next',
+    class: `px-4 py-2 rounded bg-gray-300 ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`,
+    disabled: currentPage === totalPages
+  }).on('click', function () {
+    if (currentPage < totalPages) {
+      currentPage++;
+      fetchProductsCallback();
+    }
+  });
+  $paginationControls.append(nextButton);
 }
+
 // Attach event listeners for edit and delete buttons
 function attachProductEventListeners() {
   // Edit Buttons
-  document.querySelectorAll('.edit-product-btn').forEach(button => {
-    button.addEventListener('click', (event) => {
-      const productId = event.currentTarget.getAttribute('data-id');
-      const products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
-      const productToEdit = products.find(product => product.product_id === Number(productId));
-  
-      if (productToEdit) {
-          openEditProductModal(
-            productId,
-            productToEdit.product_name,
-            productToEdit.purchase_price,
-            productToEdit.selling_price,
-            productToEdit.reorder_level,
-            productToEdit.supplier_id,
-            productToEdit.product_code // Pass the supplier ID here
-          );
-      } else {
-          console.error('Product not found:', productId);
-      }
-  });
-  });
+  $('.edit-product-btn').on('click', function () {
+    const productId = $(this).data('id');
+    const products = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
+    const productToEdit = products.find(product => product.product_id === Number(productId));
 
-    // Delete Buttons
-    document.querySelectorAll('.delete-product-btn').forEach(button => {
-      button.addEventListener('click', deleteProduct);
+    if (productToEdit) {
+      openEditProductModal(
+        productId,
+        productToEdit.product_name,
+        productToEdit.purchase_price,
+        productToEdit.selling_price,
+        productToEdit.reorder_level,
+        productToEdit.product_code,
+        productToEdit.supplier_id
+      );
+    } else {
+      console.error('Product not found:', productId);
+    }
   });
+  
+  // Delete Buttons
+  $('.delete-product-btn').on('click', deleteProduct);
 }
+
 
 // Reusable modal functions
 export function openAddProductModal() {
-  const productForm = document.getElementById('productForm');
-  productForm.setAttribute('data-mode', 'add');  // Set form mode to 'add'
+  const $productForm = $('#productForm');
+  $productForm.attr('data-mode', 'add');  // Set form mode to 'add'
   console.log('Form mode set to:', productForm.getAttribute('data-mode'));  // Debugging log
 
   // Clear the input fields
-  document.getElementById('productName').value = '';
-  document.getElementById('price').value = '';
-  document.getElementById('sellingPrice').value = '';
-  document.getElementById('reorderLevel').value = '';
-  document.getElementById('productCode').value = '';
+  $('#productName').val = ('');
+  $('#price').val = ('');
+  $('#sellingPrice').val = ('');
+  $('#reorderLevel').val = ('');
+  $('#productCode').val = ('');
   
 
   // Update modal title and button text for "Add"
-  document.getElementById('productModalTitle').innerText = 'Add product';
-  document.getElementById('productSubmitButton').innerText = 'Add';
+  $('#productModalTitle').text('Add product');
+  $('#productSubmitButton').text('Add');
 
-  const productCodeField = document.getElementById('productCode');
-  productCodeField.disabled = false; // Disable the field to prevent editing
+  $('#productCode').prop('disable', false); // Disable the field to prevent editing
 
 
   // Open the modal (assuming you have some modal logic)
-  document.getElementById('productModal').classList.remove('hidden');
+  $('#productModal').removeClass('hidden');
 
   fetchAndPopulateSuppliers();
   fetchAndPopulateCategories();
@@ -263,28 +243,27 @@ export function openAddProductModal() {
 
 // Function to open the Item Modal (for both Add and Edit)
 export function openEditProductModal(productId, productName, price, sellingPrice, reorderLevel, productCode) {
-  const productForm = document.getElementById('productForm');
-  productForm.setAttribute('data-mode', 'edit');  // Set form mode to 'edit'
-  productForm.setAttribute('data-id', productId); // Set the form's data-id to the productId
+  const $productForm = $('#productForm');
+  $productForm.attr('data-mode', 'edit');  // Set form mode to 'edit'
+  $productForm.attr('data-id', productId); // Set the form's data-id to the productId
 
   // Populate the visible Product ID field and disable it
-  const productCodeField = document.getElementById('productCode');
-  productCodeField.disabled = true; // Disable the field to prevent editing
- console.log(productCode);
- console.log(productName);
+   // Disable the field to prevent editing
+  $('#productCode').prop('disable', true);
+
   // Populate the form fields with the item data
-  document.getElementById('productName').value = productName;
-  document.getElementById('price').value = price;
-  document.getElementById('sellingPrice').value = sellingPrice;
-  document.getElementById('reorderLevel').value = reorderLevel;
-  document.getElementById('productCode').value = productCode;
+  $('#productName').val(productName);
+  $('#price').val(price);
+  $('#sellingPrice').val(sellingPrice);
+  $('#reorderLevel').val(reorderLevel);
+  $('#productCode').val(productCode);
 
   // Update modal title and button text for "Edit"
-  document.getElementById('productModalTitle').innerText = 'Edit Product';
-  document.getElementById('productSubmitButton').innerText = 'Update';
+  $('#productModalTitle').text('Edit Product');
+  $('#productSubmitButton').text('Update');
 
   // Open the modal
-  document.getElementById('productModal').classList.remove('hidden');
+  $('#productModal').removeClass('hidden');
 
   // Fetch suppliers and populate the dropdown (if not already populated)
   fetchAndPopulateSuppliers();
@@ -292,92 +271,70 @@ export function openEditProductModal(productId, productName, price, sellingPrice
 }
 
 
-// Function to close the Item Modal
+// Function to close the product Modal
  function closeProductModal() {
-  document.getElementById('productForm').reset(); // Clear the form
-  document.getElementById('productModal').classList.add('hidden');
+ $('#productForm')[0].reset(); // Clear the form
+ $('#productModal').addClass('hidden');
 }
 
 // Handling the form submission for peoduct (both add and edit)
-document.getElementById('productForm').addEventListener('submit', function(event) {
+$('#productForm').on('submit', function(event) {
   event.preventDefault();
-  const productForm = event.target;
-  const mode = productForm.getAttribute('data-mode'); // Either 'add' or 'edit'
-  const productName = document.getElementById('productName').value.trim();
-  const price = document.getElementById('price').value.trim();
-  const sellingPrice = document.getElementById('sellingPrice').value.trim();
-  const reorderLevel = document.getElementById('reorderLevel').value.trim();
-  const productCode = document.getElementById('productCode').value.trim();
-  const supplierId = document.getElementById('supplierDropdown').value;  // Capture supplier ID
-  const categoryId = document.getElementById('categoryDropdown').value;
+  const $productForm = $(event.target);
+  const mode = $productForm.attr('data-mode'); // Either 'add' or 'edit'
+  const productName = $('#productName').val().trim();
+  const price = $('#price').val().trim();
+  const sellingPrice = $('#sellingPrice').val().trim();
+  const reorderLevel = $('#reorderLevel').val().trim();
+  const productCode = $('#productCode').val().trim();
+  const supplierId = $('#supplierDropdown').val();  // Capture supplier ID
+  const categoryId = $('#categoryDropdown').val();
 
+    // Prepare the product data object
+    const productData = { 
+      product_name: productName,
+      purchase_price: price,
+      selling_price: sellingPrice,
+      reorder_level: reorderLevel,
+      product_code: productCode,
+      supplier_id: supplierId,
+      category_id: categoryId
+    };
 
   if (mode === 'add') {
     // Add a new product
-    fetch('http://localhost:8080/api/inventory/products', {
+    $.ajax({
+      url: 'http://localhost:8080/api/inventory/products',
       method: 'POST',
-      body: JSON.stringify({ 
-        product_name: productName.trim(),
-        purchase_price: price.trim(),
-        selling_price: sellingPrice.trim(),
-        reorder_level: reorderLevel.trim(),
-        product_code: productCode.trim(),
-        supplier_id: supplierId,
-        category_id: categoryId
-        
-      }),
-      headers: {
-        'Content-Type': 'application/json'
+      data: JSON.stringify(productData),
+      contentType: 'application/json',
+      success: function(data) {
+        console.log('Product added response data:', data);  // Log the response
+        showAlertMessage('Product added successfully!', 'success');
+        fetchProducts();  // Refresh the product list
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.error('Error adding product:', textStatus, errorThrown);  // Log any error
       }
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();  // Expecting plain text response
-    })
-    .then(data => {
-      console.log('product added response data:', data);  // Log the response
-      showAlertMessage('product added successfully!', 'success');
-      fetchProducts();  // Refresh the product list
-    })
-    .catch(error => {
-      console.error('Error adding product:', error);  // Log any error
     });
     
-  }   else if (mode === 'edit') {
+  } else if (mode === 'edit') {
     // Edit an existing item
-    const productId = productForm.getAttribute('data-id');
+    const productId = $productForm.attr('data-id');
     console.log('Editing product with ID:', productId); // Log the item ID being edited
-    fetch(`http://localhost:8080/api/inventory/products/${productId}`, {
+    $.ajax({
+      url: `http://localhost:8080/api/inventory/products/${productId}`,
       method: 'PUT',
-      body: JSON.stringify({ 
-        product_name: productName,  // changed to product_name
-        purchase_price: price, // changed to price
-        selling_price: sellingPrice,
-        reorder_level: reorderLevel, 
-        supplier_id: supplierId,
-        category_id: categoryId,
-        product_code: productCode
-      }),
-      headers: {
-        'Content-Type': 'application/json'
+      data: JSON.stringify(productData),
+      contentType: 'application/json',
+      success: function(data) {
+        console.log('Product updated response data:', data); // Log response data
+        showAlertMessage('Product updated successfully!', 'success');
+        fetchProducts();  // Refresh the product list
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+        console.error('Error updating product:', textStatus, errorThrown); // Log any error
       }
-    })
-    .then(response => {
-      console.log('Response status:', response.status); // Log response status
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-      return response.text();  // Expecting plain text response, not JSON
-    })
-    .then(data => {
-      console.log('product updated response data:', data); // Log response data
-      showAlertMessage('product updated successfully!', 'success');
-      fetchProducts();  // Refresh the product list
-    })
-    .catch(error => {
-      console.error('Error updating product:', error); // Log any error
     });
   }
 
@@ -385,41 +342,37 @@ document.getElementById('productForm').addEventListener('submit', function(event
 });
 
 export function deleteProduct(event) {
-  const productId = event.target.closest('button').getAttribute('data-id');
+  const productId = $(event.target).closest('button').data('id');
   if (!productId) {
-      console.error('No Product ID found to delete.');
-      return;
+    console.error('No Product ID found to delete.');
+    return;
   }
 
-  // Show confirmation dialog
+  // Show confirmation dialog using alertify or any preferred method
   alertify.confirm("Are you sure you want to delete this product?",
-  function(){  // User clicked 'Ok'
+    function() { // User clicked 'Ok'
       // Proceed to delete the item
-      fetch(`http://localhost:8080/api/inventory/products/${productId}`, {
-          method: 'DELETE'
-      })
-      .then(response => {
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
+      $.ajax({
+        url: `http://localhost:8080/api/inventory/products/${productId}`,
+        method: 'DELETE',
+        success: function(response) {
           console.log('Product deleted successfully.');
 
-          // Show the red danger alert
+          // Show the success alert
           showAlertMessage('Product deleted successfully!', 'danger'); // Red for delete
 
-          // Remove the item from localStorage
-          let savedProducts = JSON.parse(localStorage.getItem('inventoryProducts')) || [];
-          savedProducts = savedProducts.filter(product => product.product_id !== Number(productId));
-          localStorage.setItem('inventoryProducts', JSON.stringify(savedProducts));
-
-          // Refresh the product list after deletion
+          // Optionally, refresh the product list after deletion
           fetchProducts(); 
-      })
-      .catch(error => console.error('Error deleting item:', error));
-  },
-  function(){  // User clicked 'Cancel'
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.error('Error deleting product:', textStatus, errorThrown);
+        }
+      });
+    },
+    function() { // User clicked 'Cancel'
       alertify.error('Delete action canceled.');
-  });
+    }
+  ); 
 }
 
 
@@ -438,8 +391,6 @@ function showAlertMessage(message, type) {
     alertify.message(message);  // General message alert
 }
 }
-
-
 
 
 

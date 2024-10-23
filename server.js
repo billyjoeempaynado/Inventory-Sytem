@@ -57,6 +57,7 @@ app.get("/", (req, res) => {
 });
 
 
+  
 // Route to render items page
 app.get('/orders', (req, res) => {
     res.render('orders');  // Render the order.ejs view

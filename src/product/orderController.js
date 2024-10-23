@@ -10,6 +10,19 @@ const getOrders = (req, res) => {
   });
 };
 
+
+const getOrderAndItems = (req, res) => {
+  const order_id = parseInt(req.params.order_id); // Get order_id from request parameters
+  pool.query(queries.getOrderAndItems, [order_id], (error, results) => {
+    if (error) {
+      return res.status(500).json({ error: "Failed to retrieve order items" });
+    }
+    res.status(200).json(results.rows);
+  });
+};
+
+
+
 const getOrderById = (req, res) => {
   const order_id = parseInt(req.params.order_id);
   pool.query(queries.getOrderById, [order_id], (error, results) => {
@@ -20,30 +33,63 @@ const getOrderById = (req, res) => {
   });
 };
 
-const addOrder = (req, res) => {
-  const { customer_name, order_date, status, total_amount } = req.body;
 
-  // Log the entire request body for debugging
-  console.log("Request Body:", req.body);
+
+const addOrder = async (req, res) => {
+  const { customer_name, order_date, status, items } = req.body; // Include items in the request
 
   // Validate required fields
   if (!customer_name || !order_date) {
     return res.status(400).json({ error: "Customer name and order date are required" });
   }
 
-  // Insert the order and retrieve the order_id
-  pool.query(queries.addOrder, [customer_name, order_date, status, total_amount], (error, results) => {
-    if (error) {
-      console.error("Error adding Order:", error);
-      return res.status(500).json({ error: "Failed to add Order" });
+  const client = await pool.connect();
+  let totalAmount = 0;
+
+  try {
+    // Begin transaction
+    await client.query('BEGIN');
+
+    // Insert the order and retrieve the order_id
+    const orderResult = await client.query(
+      "INSERT INTO orders (customer_name, order_date, status, total_amount) VALUES ($1, $2, $3, $4) RETURNING order_id",
+      [customer_name, order_date, status, 0] // Initially set total_amount to 0
+    );
+    const order_id = orderResult.rows[0].order_id;
+
+    // If items were passed, add them and calculate totalAmount
+    if (items && items.length > 0) {
+      for (const item of items) {
+        const { product_id, quantity, price } = item;
+        totalAmount += quantity * price;
+
+        // Insert items into order_items table
+        await client.query(
+          "INSERT INTO order_items (order_id, product_id, quantity, price) VALUES ($1, $2, $3, $4)",
+          [order_id, product_id, quantity, price]
+        );
+      }
+
+      // Update the order with the correct total_amount
+      await client.query(
+        "UPDATE orders SET total_amount = $1 WHERE order_id = $2",
+        [totalAmount, order_id]
+      );
     }
 
-    // Get the inserted order_id
-    const order_id = results.rows[0].order_id; // Extract the order_id from the results
-
-    res.status(201).json({ message: "Order Created Successfully!", order_id }); // Return order_id in the response
-  });
+    // Commit transaction
+    await client.query('COMMIT');
+    res.status(201).json({ message: "Order and items created successfully", order_id, total_amount: totalAmount });
+  } catch (error) {
+    // Rollback transaction in case of error
+    await client.query('ROLLBACK');
+    console.error("Error adding order and items:", error);
+    res.status(500).json({ error: "Failed to add order and items" });
+  } finally {
+    client.release();
+  }
 };
+
 
 
 
@@ -79,51 +125,97 @@ const deleteOrder = (req, res) => {
 };
 
 
-const updateOrder = (req, res) => {
+const updateOrderAndItems = async (req, res) => {
   const order_id = parseInt(req.params.order_id);
-  const { customer_name, order_date, status } = req.body;
+  const { customer_name, order_date, status, items } = req.body;
+  console.log('Received request to update order items:', req.body); // Log the incoming request
 
-  pool.query(queries.getOrderById, [order_id], (error, results) => {
-    if (error) {
-      return res.status(500).json({ error: "Failed to retrieve order" });
+  if (!customer_name || !order_date || !status) {
+    return res.status(400).json({ error: "Missing required fields: customer_name, order_date, or status" });
+  }
+
+  // Ensure items are present
+  if (!items || items.length === 0) {
+    return res.status(400).json({ error: "Order must contain at least one item" });
+  }
+
+  const client = await pool.connect();
+
+  try {
+    // Begin transaction
+    await client.query('BEGIN');
+
+    // Update the order in the "orders" table
+    await client.query(
+      "UPDATE orders SET customer_name = $1, order_date = $2, status = $3 WHERE order_id = $4",
+      [customer_name, order_date, status, order_id]
+    );
+
+    // Calculate the new total amount for the order
+    let totalAmount = 0;
+
+    // Upsert (insert or update) order items
+    for (const item of items) {
+      const { product_id, quantity, price } = item;
+
+      // Compute total amount for the current item
+      totalAmount += quantity * price;
+
+      // Insert or update the order item
+      await client.query(
+        `INSERT INTO order_items (order_id, product_id, quantity, price) 
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (order_id, product_id) 
+         DO UPDATE SET quantity = $3, price = $4`,
+        [order_id, product_id, quantity, price]
+      );
     }
 
-    const noOrderFound = !results.rows.length;
-    if (noOrderFound) {
-      return res.status(404).send("This Order does not exist in the database");
-    }
+    // Update the total amount in the "orders" table
+    await client.query(
+      "UPDATE orders SET total_amount = $1 WHERE order_id = $2",
+      [totalAmount, order_id]
+    );
 
-    pool.query(queries.updateOrder, [customer_name, order_date, status, order_id], (error, results) => { // Pass `order_id` as the 4th parameter
-      if (error) {
-        return res.status(500).json({ error: "Failed to update order" });
-      }
-      res.status(200).send("Order updated successfully");
-    });
-  });
+    // Commit the transaction
+    await client.query('COMMIT');
+    res.status(200).json({ message: "Order and items updated successfully", total_amount: totalAmount });
+  } catch (error) {
+    // Rollback the transaction in case of error
+    await client.query('ROLLBACK');
+    console.error("Error updating order and items:", error);
+    res.status(500).json({ error: "Failed to update order and items" });
+  } finally {
+    client.release();
+  }
 };
 
+
+
+
 const addOrderItem = (req, res) => {
-  const order_id = parseInt(req.params.order_id); // Make sure you're getting the order_id correctly
+  const order_id = parseInt(req.params.order_id);
   const { product_id, quantity, price } = req.body;
 
-  // Log the values for debugging
-  console.log("Order ID:", order_id);
-  console.log("Request Body:", req.body);
-
-  // Check if order_id is valid
   if (!order_id) {
     return res.status(400).json({ error: "Order ID is required" });
   }
 
-  // Proceed to insert the new order item
-  pool.query(queries.addOrderItem, [order_id, product_id, quantity, price], (error, results) => {
+  pool.query(queries.addOrderItem, [order_id, product_id, quantity, price], (error) => {
     if (error) {
       return res.status(500).json({ error: "Failed to add order item" });
     }
-    // Update total amount logic here
+
+    // Recalculate the total amount after adding the item
+    pool.query(queries.updateTotalAmount, [order_id], (error) => {
+      if (error) {
+        return res.status(500).json({ error: "Failed to update total amount" });
+      }
+
+      res.status(201).json({ message: "Order item added and total amount updated successfully" });
+    });
   });
 };
-
 
 
 module.exports = {
@@ -131,8 +223,9 @@ module.exports = {
   getOrderById,
   addOrder,
   deleteOrder,
-  updateOrder,
-  addOrderItem
+  updateOrderAndItems,
+  addOrderItem,
+  getOrderAndItems
 
 
 };

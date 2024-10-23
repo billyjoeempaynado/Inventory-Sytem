@@ -63,18 +63,20 @@ export function displaySuppliers(suppliers) {
           const row = document.createElement('tr');
 
           row.innerHTML = `
-              <td class="py-4 px-6 text-sm  text-gray-900">${suppliers.supplier_name}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">${suppliers.contact_person}  </td>
-              <td class="py-4 px-6 text-sm text-gray-500">${suppliers.phone_number}</td>
-              <td class="py-4 px-6 text-sm text-gray-500">${suppliers.supplier_email}</td>
-              <td class="py-4 px-6 text-sm text-gray-500"> ${suppliers.supplier_address}</td>
+              <td class="py-4 px-6 text-sm  text-gray-900 text-center">${suppliers.supplier_name}</td>
+              <td class="py-4 px-6 text-sm text-gray-500 text-center">${suppliers.contact_person}  </td>
+              <td class="py-4 px-6 text-sm text-gray-500 text-center">${suppliers.phone_number}</td>
+              <td class="py-4 px-6 text-sm text-gray-500 text-center">${suppliers.supplier_email}</td>
+              <td class="py-4 px-6 text-sm text-gray-500 text-center"> ${suppliers.supplier_address}</td>
               <td class="sm:flex py-4 px-6 text-sm">
+                <div class="flex items-center justify-center space-x-2">
                   <button data-id="${suppliers.supplier_id}" class="edit-supplier-btn p-2 text-gray-700 hover:text-gray-500">
                       <i class="fa-solid fa-pen-to-square"></i>
                   </button>
                   <button data-id="${suppliers.supplier_id}" class="delete-supplier-btn p-2 text-red-700 hover:text-red-500">
                       <i class="fa-solid fa-trash-can" style="color: #f84444;"></i>
                   </button>
+                 </div> 
               </td>
           `;
           tableBody.appendChild(row);

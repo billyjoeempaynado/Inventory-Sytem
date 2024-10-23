@@ -8,6 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const productsSection = document.getElementById('productsSection');
   const suppliersSection = document.getElementById('suppliersSection');
   const ordersSection = document.getElementById('ordersSection');
+  const inventoryLevelSection = document.getElementById('inventoryLevelSection');
+  const reportsSection = document.getElementById('reportsSection');
+  const logsSection = document.getElementById('logsSection');
+  const orderDetailSection = document.getElementById('orderDetailSection');
   const welcomeSection = document.getElementById('welcomeSection');
 
     /// buttons on dashboard
@@ -15,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const suppliersButton = document.getElementById('suppliersButton');
   const ordersButton = document.getElementById('ordersButton');
   const productsButton = document.getElementById('productsButton');
+  const inventoryLevelButton = document.getElementById('inventoryLevelButton');
+  const reportsButton = document.getElementById('reportsButton');
+  const viewDetailsButton = document.getElementById('.viewDetailsButton');
+  const logsButton = document.getElementById('logsButton');
 
    // should button for cancel
   const productCancelButton = document.getElementById('productCancelButton');
@@ -39,8 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showSection(productsSection);
         fetchProducts();
     });
-}
-
+  }
 
   if (suppliersButton) {
       suppliersButton.addEventListener('click', () => {
@@ -55,25 +62,39 @@ document.addEventListener('DOMContentLoaded', () => {
           fetchOrders();
       });
   }
+  if (inventoryLevelButton) {
+    inventoryLevelButton.addEventListener('click', () => {
+        showSection(inventoryLevelSection);
 
-  
+    });
+  }
+
+  if (reportsButton) {
+    reportsButton.addEventListener('click', () => {
+        showSection(reportsSection);
+
+    });
+  }
+  if (logsButton) {
+    logsButton.addEventListener('click', () => {
+        showSection(logsSection);
+
+    });
+  }
+  if (viewDetailsButton) {
+    viewDetailsButton.addEventListener('click', () => {
+        showSection(orderDetailSection);
+
+    });
+  }
+
 
   // Ensure the section exists before using the showSection function
   function showSection(sectionToShow) {
-      if (!sectionToShow) {
-          console.error("Section to show is null or undefined.");
-          return;
-      }
-      
-      // Hide all sections
-      productsSection?.classList.add('hidden');
-      suppliersSection?.classList.add('hidden');
-      ordersSection?.classList.add('hidden');
-      welcomeSection?.classList.add('hidden');
-      
-      // Show the section passed to the function
-      sectionToShow.classList.remove('hidden');
-  }
+    const sections = [productsSection, suppliersSection, ordersSection, inventoryLevelSection, reportsSection, logsSection, orderDetailSection ,welcomeSection];
+    sections.forEach(section => section.classList.add('hidden')); // Hide all sections
+    sectionToShow.classList.remove('hidden'); // Show selected section
+}
 
   // declaration of variable to the closeModal function
   if (productCancelButton && productModal) {
